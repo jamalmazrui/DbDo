@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 26 November 2026, evening -- The BrailleMonitor rebuild never goes quiet
+
+- **A status line at least every 20 seconds.** Progress came every fifth issue, but the newest issues are checked with nfb.org one page a second, so the rebuild's first five issues took a silent minute and looked hung. While issues are read, a line now says which issue the work is on whenever 20 seconds pass without one. The rebuild's opening line also gives an honest estimate, roughly half an hour to an hour, since most pages are read from disk, instead of the first run's "some hours."
+- **And the build now shows them.** The build ran each template's repair with its output sent only to the build log, so the rebuild's progress lines never reached the console, which sat silent after "defs: 0 databases renamed from the old name." The repair now speaks on the console, after a "Checking BrailleMonitor.db" line; the build log keeps the command and exit code, and the script's own log keeps the detail.
+
+## 26 November 2026, late night -- The freezes found and fixed
+
+- **Moving a row no longer freezes DbDo.** The stall watch's first report named the cause, and it was not the database or its full-text index: two seconds after any change of view -- a row move, a filter, a sort -- DbDo saved the Recent Files list to DbDo.inix one key at a time, about 2,000 keys, each a rewrite of the whole file. With each rewrite slowed by the computer's file scanning, DbDo stopped answering for 2 to 17 seconds. The list is now saved in one write, and not at all when nothing in it changed; a save that still takes half a second or more is logged.
+- **BrailleMonitor's rebuild gets past 1968.** The first rebuild with the older issues read 617 of 734 issues, then stopped at May 1968: one of that page's parts left a list or table open, which hid the next part's dividing mark from Pandoc. When the parts of an issue do not come back one for one, each is now converted alone. The next build carries on from the pages already saved.
+
 ## 26 November 2026, night -- The Braille Monitor from 1957, and freezes logged
 
 - **BrailleMonitor now reaches back to 1957.** The first full build read 313 issues, from 1985 to 1986 and 2000 on, because it knew only the Monitor's issue folders. The older issues are single pages in many spellings, and the 1987 to 1999 issues have no folder. The builder now reads them too: a one-page issue is divided at its own headings, a table of contents without a folder is read like a folder's, and when a month has both, the folder wins. Issues of The Blind American, which the NFB published in 1961 and 1962 while the Monitor paused, are marked with that edition. The next build sees the older issues are missing and rebuilds the template from the pages already saved, asking nfb.org only about the few it lacks.

@@ -21815,6 +21815,24 @@ namespace DbDo
                 }
             }
 
+            // writeMany: many { section, key, value } in one read and at most one write of DbDo.inix
+            // (26 November 2026). Recent Files used to call write once a key, about 2,000 times a save,
+            // each a whole-file rewrite; the stall watch showed DbDo frozen in ReplaceFile for 2 to 17
+            // seconds whenever a row move or filter changed the view. A save that changes nothing writes nothing.
+            public static void writeMany(List<string[]> lTriples)
+            {
+                if (lTriples == null || lTriples.Count == 0) return;
+                System.Diagnostics.Stopwatch oWatch = System.Diagnostics.Stopwatch.StartNew();
+                if (!InixCodec.writeValues(iniPath(), lTriples))
+                {
+                    try { DbDoLog.write("IniSession.writeMany FAILED: " + iniPath() + " (" + lTriples.Count + " keys)"); } catch { }
+                }
+                else if (oWatch.ElapsedMilliseconds >= 500)
+                {
+                    try { DbDoLog.write("IniSession.writeMany slow: " + lTriples.Count + " keys in " + oWatch.ElapsedMilliseconds + " ms"); } catch { }
+                }
+            }
+
             public static string lastDatabase { get { return read("LastDatabase"); } set { write("LastDatabase", value); } }
             public static string lastTable    { get { return read("LastTable");    } set { write("LastTable",    value); } }
 
@@ -22215,6 +22233,7 @@ namespace DbDo
                 // Write at least the original 10 slots so lowering the
                 // history count below 10 still clears the stale ones; a
                 // higher count widens the range to persist every entry.
+                List<string[]> lWrites = new List<string[]>();
                 int iSpan = IniSession.historyCount();
                 if (iSpan < 10) iSpan = 10;
                 for (int i = 1; i <= iSpan; i++)
@@ -22223,31 +22242,31 @@ namespace DbDo
                     if (i <= l.Count)
                     {
                         FileState f = l[i - 1];
-                        IniSession.write(sSection, "path", f.sPath ?? "");
-                        IniSession.write(sSection, "LastTable", f.sLastTable ?? "");
+                        lWrites.Add(new string[] { sSection, "path", f.sPath ?? "" });
+                        lWrites.Add(new string[] { sSection, "LastTable", f.sLastTable ?? "" });
                         // Write each table's state under sequential t1_ / t2_ keys.
                         int iT = 1;
                         foreach (KeyValuePair<string, TableState> kv in f.dTables)
                         {
                             if (iT > 32) break;
                             TableState ts = kv.Value;
-                            IniSession.write(sSection, "t" + iT + "_name",     ts.sName ?? "");
-                            IniSession.write(sSection, "t" + iT + "_filter",   ts.sFilter ?? "");
-                            IniSession.write(sSection, "t" + iT + "_sort",     ts.sSort ?? "");
-                            IniSession.write(sSection, "t" + iT + "_position", ts.iPosition.ToString());
-                            IniSession.write(sSection, "t" + iT + "_vcol",     ts.sVirtualColumn ?? "");
-                            IniSession.write(sSection, "t" + iT + "_selectlist", ts.sSelectList ?? "");
+                            lWrites.Add(new string[] { sSection, "t" + iT + "_name",     ts.sName ?? "" });
+                            lWrites.Add(new string[] { sSection, "t" + iT + "_filter",   ts.sFilter ?? "" });
+                            lWrites.Add(new string[] { sSection, "t" + iT + "_sort",     ts.sSort ?? "" });
+                            lWrites.Add(new string[] { sSection, "t" + iT + "_position", ts.iPosition.ToString() });
+                            lWrites.Add(new string[] { sSection, "t" + iT + "_vcol",     ts.sVirtualColumn ?? "" });
+                            lWrites.Add(new string[] { sSection, "t" + iT + "_selectlist", ts.sSelectList ?? "" });
                             iT++;
                         }
                         // Clear unused indexes from prior writes (up to 32).
                         for (int j = iT; j <= 32; j++)
                         {
-                            IniSession.write(sSection, "t" + j + "_name", "");
-                            IniSession.write(sSection, "t" + j + "_filter", "");
-                            IniSession.write(sSection, "t" + j + "_sort", "");
-                            IniSession.write(sSection, "t" + j + "_position", "");
-                            IniSession.write(sSection, "t" + j + "_vcol", "");
-                            IniSession.write(sSection, "t" + j + "_selectlist", "");
+                            lWrites.Add(new string[] { sSection, "t" + j + "_name", "" });
+                            lWrites.Add(new string[] { sSection, "t" + j + "_filter", "" });
+                            lWrites.Add(new string[] { sSection, "t" + j + "_sort", "" });
+                            lWrites.Add(new string[] { sSection, "t" + j + "_position", "" });
+                            lWrites.Add(new string[] { sSection, "t" + j + "_vcol", "" });
+                            lWrites.Add(new string[] { sSection, "t" + j + "_selectlist", "" });
                         }
                     }
                     else
@@ -22255,10 +22274,11 @@ namespace DbDo
                         // Empty slot: clear path so loadAll's
                         // empty-section-breaks-the-loop semantic
                         // works. Don't bother zeroing every key.
-                        IniSession.write(sSection, "path", "");
-                        IniSession.write(sSection, "LastTable", "");
+                        lWrites.Add(new string[] { sSection, "path", "" });
+                        lWrites.Add(new string[] { sSection, "LastTable", "" });
                     }
                 }
+                IniSession.writeMany(lWrites);
             }
         }
 

@@ -68,7 +68,7 @@ import makeBrailleForum as core
 
 core.sSource = "BrailleMonitor"
 core.sSite = "nfb.org"
-core.sVersion = "2026-11-26 version 2: the Braille Monitor from 1957 on, adding the one-page issues of 1957 to 1984 and the 1987 to 1999 issues"
+core.sVersion = "2026-11-26 version 3: the Braille Monitor from 1957 on; a one-page issue whose parts leave a tag open is converted part by part"
 core.sUserAgent = "DbDo makeBrailleMonitor/2 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the NFB Braille Monitor)"
 core.sFirstRun = "The first run reads about ten thousand pages, one a second, so it takes some hours; later runs ask only about recent issues."
 core.sTemplate = os.path.join(core.sProject, "templates", "BrailleMonitor")

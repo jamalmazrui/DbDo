@@ -57,7 +57,7 @@ THE LOG, logs\DbDo-makeBrailleForum-<date>-<time>.log, names every page fetched 
 and how it was divided, and every key decision. The console says one line a stage.
 """
 
-import collections, datetime, hashlib, html, html.parser, io, os, platform, re, sqlite3, subprocess, sys, traceback, urllib.parse
+import collections, datetime, hashlib, html, html.parser, io, os, platform, re, sqlite3, subprocess, sys, time, traceback, urllib.parse
 
 sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
@@ -120,8 +120,24 @@ dReport = collections.defaultdict(list)
 dPlain = {}  # characters of search_text from Pandoc and from the tag stripper, compared in the log (version 5)
 
 
-def log(sText): return trail.log(sText)
-def say(sText): return trail.say(sText)
+# A HEARTBEAT ON THE CONSOLE (26 November 2026). Progress came every fifth issue, but recent issues are checked with the
+# site one page a second, so the first five took a silent minute, and a rebuild looked hung and was stopped. Now, while
+# the issues are read, any log line written 20 seconds or more after the last console message also says where the work
+# stands, so the console is never quiet for long.
+iHeartbeatSeconds = 20
+sHeartbeat = ""          # what the long loop is on, set by main; empty outside it
+fLastSay = [time.time()]
+
+
+def say(sText):
+    fLastSay[0] = time.time()
+    return trail.say(sText)
+
+
+def log(sText):
+    oResult = trail.log(sText)
+    if sHeartbeat and time.time() - fLastSay[0] >= iHeartbeatSeconds: say(sHeartbeat)
+    return oResult
 
 
 def plural(iCount, sOne, sMany=""):
@@ -353,7 +369,18 @@ def toMarkdown(sPandoc, lsFragments, sFormat=""):
     oRun = subprocess.run([sPandoc, "-f", "html", "-t", sFormat, "--wrap=none"], input=sJoined.encode("utf-8"), capture_output=True)
     if oRun.returncode != 0: raise RuntimeError("Pandoc exit %d: %s" % (oRun.returncode, oRun.stderr.decode("utf-8", "replace")[:300]))
     lsParts = re.split(r"(?m)^HOMERSPLIT\d{4}\s*$", oRun.stdout.decode("utf-8").replace("\r\n", "\n"))[1:]
-    if len(lsParts) != len(lsFragments): raise RuntimeError("Pandoc returned %d parts for %d articles" % (len(lsParts), len(lsFragments)))
+    if len(lsParts) != len(lsFragments):
+        # A FRAGMENT THAT LEAVES A TAG OPEN (26 November 2026). The Monitor's one-page issues of the 1960s divide at
+        # headings that can fall inside a list or table, so a fragment may end with it still open, and the next
+        # fragment's marker lands inside it, off the start of a line: "Pandoc returned 29 parts for 30 articles"
+        # stopped the build at May 1968. The fragments are then converted one at a time, which costs a Pandoc run
+        # each but cannot run two together.
+        log("PANDOC %d parts for %d fragments in one run; converting each fragment alone" % (len(lsParts), len(lsFragments)))
+        lsParts = []
+        for sFragment in lsFragments:
+            oOne = subprocess.run([sPandoc, "-f", "html", "-t", sFormat, "--wrap=none"], input=sFragment.encode("utf-8"), capture_output=True)
+            if oOne.returncode != 0: raise RuntimeError("Pandoc exit %d: %s" % (oOne.returncode, oOne.stderr.decode("utf-8", "replace")[:300]))
+            lsParts.append(oOne.stdout.decode("utf-8").replace("\r\n", "\n"))
     return [re.sub(r"\n{3,}", "\n\n", s).strip() for s in lsParts]
 
 
@@ -986,6 +1013,9 @@ def logBodyBulk(oDb):
 
 
 fnStale = None   # a builder's own test of an existing template: returns why it must be rebuilt, else ""
+bFromSaved = False   # set when a stale template is rebuilt from pages already saved
+sFromSaved = ("Most pages are already saved and are read from disk; the recent issues are checked with the site, one page "
+              "a second. Expect roughly half an hour to an hour, with a status message at least every 20 seconds.")
 
 
 def repairTemplate():
@@ -1017,6 +1047,8 @@ def repairTemplate():
         if sStale:
             oDb.close()
             say(sSource + ".db is being rebuilt: " + sStale + " Pages already saved are not fetched again.")
+            global bFromSaved
+            bFromSaved = True
             return main([])
         if "search_text" not in lsColumns or not bAuthors:
             oDb.close()
@@ -1071,13 +1103,16 @@ def main(lsArgs):
     if iLimit: lIssues = lIssues[:iLimit]
     say("Reading %s, from %s to %s. %s"
         % (plural(len(lIssues), "issue"), lIssues[-1]["published"], lIssues[0]["published"],
-           "A pilot takes a few minutes." if iLimit else sFirstRun))
+           "A pilot takes a few minutes." if iLimit else (sFromSaved if bFromSaved else sFirstRun)))
     sPandoc = pandocPath()
     log("PANDOC %s" % (sPandoc or "none"))
     dOld = previousKeys(sTarget)
     sCutoff = (datetime.date.today() - datetime.timedelta(days=iTrustDays)).strftime("%Y-%m")
     lBuilt = []
+    global sHeartbeat
     for iAt, dIssue in enumerate(lIssues, 1):
+        sHeartbeat = "Still working: reading issue %d of %d, %s%s." % (iAt, len(lIssues), issueTitle(dIssue),
+                     ", checking its pages with the site one a second" if bRefresh or dIssue["published"] >= sCutoff else "")
         dIssue["lArticles"] = readIssue(oCache, dIssue, sPandoc, not bRefresh and dIssue["published"] < sCutoff)
         if not dIssue["lArticles"]: continue
         dIssue["next_number"] = assignKeys(dIssue, dIssue["lArticles"], dOld)
@@ -1087,6 +1122,7 @@ def main(lsArgs):
         if iAt % 5 == 0 or iAt == len(lIssues):
             say("%d of %d issues read, through %s; %s so far." % (iAt, len(lIssues), issueTitle(dIssue), plural(sum(len(d["lArticles"]) for d in lBuilt), "row")))
             oCache.save()
+    sHeartbeat = ""
     oCache.save()
     if not iLimit:
         for sIssue in sorted(set(dOld) - {d["issue_key"] for d in lBuilt}):

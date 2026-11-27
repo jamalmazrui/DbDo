@@ -167,7 +167,8 @@ rem a build against 1.64.4 failed to compile on 8 October 2026 rather than sayin
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
 rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
 rem 1.297.0: Homer.Log.watchUi logs any freeze of the window with its call stack.
-set "kitNeeded=1.297.0"
+rem 1.298.0: InixCodec.writeValues saves Recent Files in one write instead of about 2,000.
+set "kitNeeded=1.298.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -372,7 +373,13 @@ for %%M in (BrailleForum BrailleMonitor) do (
   ) else if exist "!sHere!scripts\make%%M.py" (
     rem An existing database is mended in place by each build, fetching nothing (25 November 2026: the retired
     rem views table that the first version made failed the kit's checkDb at push).
-    python "!sHere!scripts\make%%M.py" --repair >> "!log!" 2>&1
+    rem ITS MESSAGES REACH THE CONSOLE (26 November 2026). The repair's output went only to the build log, so when
+    rem it found BrailleMonitor.db out of date and rebuilt it, half an hour of progress lines went to the file and
+    rem the console sat silent after "defs: 0 databases renamed", which looked hung. The script keeps its own
+    rem detailed log; the console gets its few lines, and the build log the command and exit code.
+    echo %%M repair: python scripts\make%%M.py --repair>> "!log!"
+    echo Checking %%M.db.
+    python "!sHere!scripts\make%%M.py" --repair
     echo %%M repair: exit code !errorlevel!>> "!log!"
   )
 )
