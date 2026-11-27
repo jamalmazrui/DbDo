@@ -177,9 +177,9 @@ Hear=
 
 [step]
 
-Say=Say Status.
+Say=Say how many records are in view.
 Key=
-Hear=Shift plus Z
+Hear=Alt plus Y
 
 [step]
 

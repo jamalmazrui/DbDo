@@ -213,9 +213,9 @@ if errorlevel 1 (
   exit /b 1
 )
 echo Macro engine test passed >> "!log!"
-rem A RETIRED WALK'S AUDIO GOES (5 November 2026): Tutorial 8 became Analyze a Dataset, so the old walk's sound and
+rem A RETIRED WALK'S AUDIO GOES (5 November 2026; 27 November 2026, Tutorial 7 became Search a Library): Tutorial 8 became Analyze a Dataset, so the old walk's sound and
 rem fingerprint are removed, rather than ship beside the new one.
-for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256" axeScan.cmd axeScan.py axeWindow.cmd axeWindow.py recordWalk.cmd recordWalk.py) do if exist "%%~F" (
+for %%F in ("!sHere!help\Tutorial_7_More_Templates.inix" "!sHere!help\tutorials\7_More_Templates.mp3" "!sHere!help\tutorials\7_More_Templates.sha256" "!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256" axeScan.cmd axeScan.py axeWindow.cmd axeWindow.py recordWalk.cmd recordWalk.py) do if exist "%%~F" (
   del /q "%%~F" && echo Retired tutorial file removed: %%~nxF >> "!log!"
 )
 

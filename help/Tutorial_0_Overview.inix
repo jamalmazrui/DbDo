@@ -69,7 +69,7 @@ Hear=100 albums and 270 performers, each album linked to who recorded it.
 
 [step]
 
-Say=Four more get a shorter visit in walk seven: TechTraining, BlindCreations, ContactTrail and RecipeTrail.
+Say=Walk seven searches TalkingBookTopics, sixty thousand books from the National Library Service, by whole words. More wait in Open Template Database: TechTraining, BlindCreations, DescribedFilms, ContactTrail and RecipeTrail.
 Key=
 Hear=
 
@@ -161,15 +161,15 @@ Hear=MusicTrail: from an album to the band that recorded it, to its members, and
 
 [step]
 
-Say=Seven, More Templates.
+Say=Seven, Search a Library.
 Key=
-Hear=TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing your copy up to date when a template improves.
+Hear=Sixty thousand talking books searched by whole words, the best matches first, a news article read as a web page, and a wish list of marked books.
 
 [step]
 
-Say=Eight, Analyze a Dataset: the Titanic's passengers, the list the pandas tutorials use, filtered, averaged by group, counted, given a new column, asked in SQL and charted.
+Say=Eight, Analyze a Dataset: the Titanic's passengers, the list the pandas tutorials use, filtered, averaged by group, counted, given a new column and charted.
 Key=
-Hear=A dataset brought in, asked in SQL and in plain words, grouped, related and handed on.
+Hear=A dataset brought in, profiled, filtered, grouped, counted, charted and handed on.
 
 [step]
 

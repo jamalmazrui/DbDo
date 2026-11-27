@@ -10,6 +10,9 @@
 ; match in Filter Records uses the index on title, author, narrator, category, annotation and tags. The saved searches
 ; here rank their matches and read the passage that matched.
 ;
+; IN BRIEF. updates holds the magazine's own news articles, as Markdown in body: Control+Shift+H, Preview Markdown in
+; Web Browser, shows one as a web page with its headings and links. Full-text match there searches title and words.
+;
 ; READ ONE. Control+Shift+U opens the book's page on BARD, where it can be downloaded. Alt+Right on a book goes to its
 ; author and narrator; on an author or narrator, to their books; on an issue, to its books.
 ;
@@ -37,6 +40,11 @@ SelectFields = name, books, last_issue
 [Table:issues]
 
 SelectFields = title, books
+
+[Table:updates]
+
+SelectFields = title, issue
+OrderFields = published DESC, position
 
 [Table:defs]
 

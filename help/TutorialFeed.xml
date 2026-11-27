@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 27 Nov 2026 19:03:24 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 27 Nov 2026 20:40:26 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -15,8 +15,8 @@
       <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-0-overview</description>
       <link>Tutorials.htm#0-0-overview</link>
       <guid isPermaLink="false">homer-tutorial_0_overview</guid>
-      <enclosure url="tutorials/0_Overview.mp3" length="1855753" type="audio/mpeg"/>
-      <itunes:duration>00:04:19</itunes:duration>
+      <enclosure url="tutorials/0_Overview.mp3" length="1900208" type="audio/mpeg"/>
+      <itunes:duration>00:04:25</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -24,8 +24,8 @@
       <description>DbDo is open on RadioTrail. Full transcript: Tutorials.htm#0a-1-user-interface</description>
       <link>Tutorials.htm#0a-1-user-interface</link>
       <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
-      <enclosure url="tutorials/1_User_Interface.mp3" length="1492981" type="audio/mpeg"/>
-      <itunes:duration>00:03:54</itunes:duration>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1505139" type="audio/mpeg"/>
+      <itunes:duration>00:03:55</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -74,12 +74,12 @@
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>7 - More Templates</title>
-      <description>DbDo is open. Full transcript: Tutorials.htm#0g-7-more-templates</description>
-      <link>Tutorials.htm#0g-7-more-templates</link>
-      <guid isPermaLink="false">homer-tutorial_7_more_templates</guid>
-      <enclosure url="tutorials/7_More_Templates.mp3" length="1387376" type="audio/mpeg"/>
-      <itunes:duration>00:03:19</itunes:duration>
+      <title>7 - Search a Library</title>
+      <description>DbDo is open. Full transcript: Tutorials.htm#0g-7-search-a-library</description>
+      <link>Tutorials.htm#0g-7-search-a-library</link>
+      <guid isPermaLink="false">homer-tutorial_7_search_a_library</guid>
+      <enclosure url="tutorials/7_Search_a_Library.mp3" length="1705012" type="audio/mpeg"/>
+      <itunes:duration>00:04:16</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -96,8 +96,8 @@
       <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0i-9-conclusion</description>
       <link>Tutorials.htm#0i-9-conclusion</link>
       <guid isPermaLink="false">homer-tutorial_9_conclusion</guid>
-      <enclosure url="tutorials/9_Conclusion.mp3" length="1070513" type="audio/mpeg"/>
-      <itunes:duration>00:02:46</itunes:duration>
+      <enclosure url="tutorials/9_Conclusion.mp3" length="1255004" type="audio/mpeg"/>
+      <itunes:duration>00:03:13</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
   </channel>

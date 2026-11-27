@@ -1,7 +1,7 @@
 ﻿#EXTM3U
-#EXTINF:259,DbDo Walkthroughs
+#EXTINF:265,DbDo Walkthroughs
 0_Overview.mp3
-#EXTINF:234,1 - User Interface
+#EXTINF:235,1 - User Interface
 1_User_Interface.mp3
 #EXTINF:219,2 - Install and Tune In
 2_Install_and_Tune_In.mp3
@@ -13,9 +13,9 @@
 5_Catalog_Your_Books.mp3
 #EXTINF:217,6 - Explore Music
 6_Explore_Music.mp3
-#EXTINF:199,7 - More Templates
-7_More_Templates.mp3
+#EXTINF:256,7 - Search a Library
+7_Search_a_Library.mp3
 #EXTINF:503,8 - Analyze a Dataset
 8_Analyze_a_Dataset.mp3
-#EXTINF:166,9 - Conclusion
+#EXTINF:193,9 - Conclusion
 9_Conclusion.mp3

@@ -304,6 +304,15 @@ first_issue = The year and month of the first issue that named this narrator.
 last_issue = The year and month of the last issue that named this narrator.
 name = The narrator's name as the magazine prints it.
 
+[TalkingBookTopics/updates]
+body = The article's words as Markdown, with its headings, lists and links; Control+Shift+H shows it as a web page.
+issue = The issue the article appeared in, such as July-August 2012.
+issue_id = The issue the article appeared in, by its number in issues.
+position = Where the article came in its issue's In Brief section: 1 for the first.
+published = The first day of the issue's first month.
+search_text = The article's words without Markdown, which the full-text index reads.
+title = The article's title as the magazine printed it.
+
 [TechTraining/presentations]
 category = The topic area, such as screen readers, phones or the web; F4 offers the choices.
 medium = Its form, such as audio, video or webinar.
@@ -470,6 +479,7 @@ TalkingBookTopics/authors = The authors of the books, with how many each wrote.
 TalkingBookTopics/books = The books Talking Book Topics announced, one row a book.
 TalkingBookTopics/issues = The issues of Talking Book Topics that were read, one row an issue.
 TalkingBookTopics/narrators = The narrators of the books, with how many each read.
+TalkingBookTopics/updates = The magazine's In Brief articles: NLS news, such as new services and BARD, one row an article.
 TechTraining/presentations = Free audio and video presentations about technology and accessibility.
 chinook/albums = Albums in the Chinook sample music store.
 chinook/artists = Artists whose music the Chinook store sells.
@@ -640,7 +650,7 @@ northwind/orders/prime = order_date, ship_city, ship_country
 ; REVIEWED 26 November 2026 (Jamal: a key made for a program, such as article_key, belongs in no look or prime). Every
 ; template's tables were read against the rules: look says a record in words a person can read and is its default
 ; columns; prime says what it is, is unique, and is its default order; neither holds an id, url, notes, tags, marked,
-; added, edited, or a program's key. Changed in their builders: BrailleForum and BrailleMonitor issues (published,
+; added, edited, or a program's key. Changed in their builders: the magazine archives' issues (published,
 ; title, not issue_key) and articles (published, issue, position, not article_key); DescribedFilms offers (film, service,
 ; terms, voice, not service and url). Kept, with reasons: RadioTrail's stream_url, below, since 52,000 stations share
 ; names and a station is known by the stream it plays; chinook invoice_items and northwind order_details look by their

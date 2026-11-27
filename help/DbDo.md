@@ -302,7 +302,7 @@ Beyond the grid's keys, the cursor moves with these commands:
 ### Editing records
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
-- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Shift+Enter) opens the url, file or folder a cell names: Enter goes into a record's related records, and Shift+Enter goes out to what the cell points at, as in FileDir. **Preview Markdown in Web Browser** (Control+Shift+H, H as in EdSharp's Control+H for HTML) shows the record's Markdown field, such as an article's body in BrailleForum, as a web page in your browser, with real headings, lists and links to follow. It finds the field itself, so the field need not be a shown column. Empty Markdown fields are skipped: when only one has words, it opens at once; with two or more, a list asks which; when all are empty, it says so and opens nothing. When the file or folder that Open Cell Value opens suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
+- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Shift+Enter) opens the url, file or folder a cell names: Enter goes into a record's related records, and Shift+Enter goes out to what the cell points at, as in FileDir. **Preview Markdown in Web Browser** (Control+Shift+H, H as in EdSharp's Control+H for HTML) shows the record's Markdown field, such as an In Brief article in TalkingBookTopics, as a web page in your browser, with real headings, lists and links to follow. It finds the field itself, so the field need not be a shown column. Empty Markdown fields are skipped: when only one has words, it opens at once; with two or more, a list asks which; when all are empty, it says so and opens nothing. When the file or folder that Open Cell Value opens suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
 - **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
@@ -391,7 +391,7 @@ A table has two kinds of field, and every DbDo dialog lists them in the same ord
 
 **Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. They are fields that say what the record is, never an id: Look and Prime Fields refuses an id, and Import leaves a file's own row numbers, such as the Titanic's passengerid, out of the prime. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Show Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime columns brings back the default order and Look columns sorts the way records are said. A short way to hold it: look is the record's label; prime is its key. Every change to the columns, sort or filter is saved at once with the table.
 
-Look and prime never include url, notes, tags, marked, added, edited, the record's own id, or any key made for a program to read, such as BrailleMonitor's article_key. Both say what a record is in words a person can read.
+Look and prime never include url, notes, tags, marked, added, edited, the record's own id, or any key made for a program to read such as a record's import key. Both say what a record is in words a person can read.
 
 ### Links read as look
 
@@ -1066,7 +1066,7 @@ Each has its own letter, and the letter is the first letter of its own word.
     letters; type accented letters as they appear. A search that finds nothing
     says so and leaves the list as it was.
   - **Full-text match** is offered only for a table with a full-text index,
-    such as the articles of BrailleForum. It takes a Homer pattern, as Keywords
+    such as the books of TalkingBookTopics. It takes a Homer pattern, as Keywords
     does, but matches whole words through the index, so `art` finds art and not
     start. Every part works: `"guide uber"~10` words near each other,
     `title:convention` a word in one field, and `%brail`, `title%conv` and
@@ -1258,6 +1258,7 @@ conference, HomerDev's convention-database skill builds one afresh from its agen
 - **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Media (Control+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
 - **DescribedFilms** -- about 10,000 English movies with audio description in the United States, documentaries included, from the Audio Description Project of the American Council of the Blind. Each film has its year, rating, genres and the services that carry it, and Alt+Right lists each service's terms and link. Free-To-Watch finds the ones free with a subscription or ads.
 - **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Media (Control+P) plays a lesson and marked ones play as a list; none come marked. Shift+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
+- **TalkingBookTopics** -- some sixty thousand talking books the National Library Service announced since 1997, searched by full text, with the magazine's own news articles
 - **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour.
 
 **chinook** and **northwind** keep their usual names. They are the two databases
@@ -1313,112 +1314,54 @@ The database is made from ADP's directory by **`scripts\makeDescribedFilms`** in
 DbDo's development folder, which fetches its pages, fifty movies to a page, in
 about five minutes. The build runs it when the database is missing.
 
-#### BrailleForum, searched by full text
+#### TalkingBookTopics, searched by full text
 
-**BrailleForum** holds the articles of The ACB Braille Forum, the American Council
-of the Blind's magazine, with its sister the ACB E-Forum: every issue that acb.org
-offers. It is built on the development computer by
-**`scripts\makeBrailleForum`** and is not in the installer, since a database this
-large needs its own way to be downloaded. A template installed apart from DbDo
-goes in its own folder of **%LOCALAPPDATA%\DbDo\templates**, where DbDo finds it
-as it finds the shipped ones, so it appears in Template Databases
-(Control+Shift+O). The build puts BrailleForum there on the development computer.
+**TalkingBookTopics** holds the books announced in Talking Book Topics, the
+magazine of the National Library Service for the Blind and Print Disabled
+(NLS): every issue that could be found, from 1997 on, some sixty thousand
+books. DbDo opens on **books**. Each row says the title, the author and the
+issue, and each book keeps its narrator, book number, length, year, category,
+and advisories such as strong language in **tags**. A description NLS wrote is
+in **annotation**; when NLS printed a publisher's, Goodreads' or Amazon's
+instead, it is left out, and **annotation_source** says whose it was.
+Control+Shift+U opens the book's page on BARD, where it can be downloaded.
 
-DbDo opens on **articles**, and each row says the title, the writer and the month
-it was **published**. The **writers** table has one row a person, found in the
-bylines, and each article is mapped to each of its writers, so Alt+Right goes
-from a writer to their articles and from an article to its writers. Alt+Right on an **issue** goes to its articles, in order. An
-article's words are in **body** when ACB published it as a web page, as Markdown
-with ACB's own headings, lists and links, and in **text** when it came only from
-the issue's plain-text file. **format** says which. **kind** tells an article
-from the masthead, the table of contents and the notices every issue repeats.
+The **authors** and **narrators** tables have one row a person, and Alt+Right
+goes from a book to its author and narrator and back. **issues** has one row an
+issue. **updates** holds the magazine's own news, its In Brief articles, as
+Markdown in **body**: Preview Markdown in Web Browser (Control+Shift+H) shows
+one as a web page, with its headings and links.
 
-Its full-text index, **articles_fts**, finds a word, a phrase or words near each
-other across every article at once, and ranks the best matches first. Three saved
-searches come with it -- Audio-Description, Convention and Transportation -- with
-Writers, Articles-By-Year and Topic-By-Year. The reading_list report writes up
-the articles you have marked. On the development computer, each build writes
-notes\BrailleForum_Coverage.md, which says which issues are in it and which
-could not be read, and notes\BrailleForum_Statistics.md, which gives the
-writers of the most articles and the most words, the longest careers, the
-columns that recur and the words the most articles use.
+It is a reference database: the copy DbDo opens follows the template, so a
+newer build replaces it, and notes and tags made in the copy do not last. Marks
+are for the moment's list. Mark the books you want with Semicolon, and the Wish
+List report (Run Report, Alt+Shift+R) writes them up with their BARD links.
 
-#### Searching BrailleForum
+#### Searching TalkingBookTopics
 
-The quickest way is Filter Records (Control+F) on articles: choose **Full-text
-match** and type a search. The matches stay in the table, to read, mark and
-open. To read one with its headings and links, press Control+Shift+H, Preview
-Markdown in Web Browser, on its record: its body opens as a web page.
-
-What full-text search adds to Keywords:
-
-- **Whole words.** Keywords finds letters anywhere, so art also finds start and
-  party. Full-text match finds the word art, and `art*` finds art, artist and
-  artwork when you want them.
-- **Nearness, choices and one field** in one search, with the index's syntax.
-- **Best first, with the reason.** A saved search ranks its matches and reads
-  the passage that matched.
+Filter Records (Control+F) on books offers **Full-text match**. It finds whole
+words, across title, author, narrator, category, description and tags at once,
+so `art` finds art and not start. The matches stay in the table, to read, mark
+and open. The saved searches (Invoke Script, Alt+V) put the best matches first:
+a word in a title counts most, then the author, narrator and category, then the
+description and tags. Each reads the passage that matched.
 
 Searches to try, each a Homer pattern:
 
-- `guide dog & uber | guide dog & lyft`: guide dog users and rideshare
-  drivers, a fight that ran for years.
-- `"guide uber"~20 | "guide lyft"~20`: the same, with the words close
-  together, so the article is about both.
-- `audio description & !movie* & !film* & !television`: description beyond
-  movies and TV.
-- `braille & literacy & !display*`: braille as reading, not braille displays.
-- `advoca* & congress*`: advocacy aimed at Congress, in every word form.
-- `title:letters`: the Letters to the Editor columns, by a word in the title.
-- `title%conv & published%2019`: articles from 2019 whose titles hold conv.
-- `title=Here and There`: every Here and There column, by its exact title.
-- `writer:charlson & audio description`: one writer on one subject.
-- `%brail`: braille, Braillenote, brailler and every other word holding
-  those letters.
+- `civil war`: two words together are a phrase.
+- `mystery & scotland`: both words, anywhere in the book's record.
+- `baseball & !violence`: baseball books, leaving out the violent ones.
+- `cook* | recipe*`: either word, in every form: cook, cooking, cookbook, recipes.
+- `"guide dog"~5`: guide and dog within five words of each other.
+- `author:king & !stephen`: authors named King, but not Stephen.
+- `narrator:morgan`: books read by a narrator named Morgan.
 
-The saved search Topic-By-Year counts a subject's articles in each year, so
-you hear when it rose and fell; change its words between the single quotes to
-follow another subject. Each build runs every search here and logs how many
-articles it finds.
+Searches of In Brief, in Filter Records on updates:
 
-#### BrailleMonitor, searched by full text
+- `bard`: every article that mentions BARD.
+- `digital & player*`: the move to digital talking-book players.
 
-**BrailleMonitor** holds the articles of the Braille Monitor, the National
-Federation of the Blind's magazine: every issue that nfb.org offers, from 1957
-on. It is made just as BrailleForum is, by the same code, so everything said
-above about BrailleForum's tables, writers, index and searches holds here too.
-It is built on the development computer by **`scripts\makeBrailleMonitor`**,
-which reads each article's own page at nfb.org, no more than one page a second;
-the first build takes some hours and later ones minutes. Like BrailleForum, it
-is not in the installer, and the build puts it in
-**%LOCALAPPDATA%\DbDo\templates**, so it appears in Template Databases
-(Control+Shift+O). Issues of The Blind American, which the NFB published in 1961
-and 1962 while the Monitor paused, are included under that edition.
-
-Both magazines are reference databases: the copy DbDo opens follows the
-template. When a build makes a newer one, DbDo replaces the copy the next time
-it starts, so notes, tags and marks made in the copy do not last.
-
-Every Monitor article is a web page, so its words are always in **body**, as
-Markdown with the NFB's own headings, lists and links. Three saved searches come
-with it -- Braille-Literacy, Employment and Structured-Discovery -- with Writers,
-Articles-By-Year and Topic-By-Year, and the reading_list report. On the
-development computer, each build writes notes\BrailleMonitor_Coverage.md and
-notes\BrailleMonitor_Statistics.md.
-
-#### Searching BrailleMonitor
-
-Searches to try, each a Homer pattern, in Filter Records with **Full-text
-match**:
-
-- `"structured discovery"`: the NFB's way of teaching blindness skills.
-- `minimum wage & sheltered workshop*`: the long fight over subminimum wages.
-- `braille & literacy & !display*`: braille as reading, not braille displays.
-- `"guide dog"~5 & airline*`: guide dog users and air travel.
-- `title:convention`: convention reports and plans, by a word in the title.
-- `writer:jernigan & philosophy`: one writer on one subject.
-
-Each build runs every search here and logs how many articles it finds.
+Each build runs every search here and logs how many records it finds.
 
 #### RadioTrail plays Internet radio
 

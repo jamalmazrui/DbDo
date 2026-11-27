@@ -1,0 +1,196 @@
+﻿; Tutorial_7_Search_a_Library.inix -- TalkingBookTopics searched by full text: a phrase, both, leaving a word out, a word's
+; start, a ranked saved search, an In Brief article shown as a web page, and books marked and written up as a wish list.
+;
+; WHY THIS WALK (27 November 2026, Jamal: tutorials should show good examples, not every feature). It replaces More
+; Templates, a brief tour of five templates: the overview names them, and full-text search, the newest way to find
+; things in DbDo, had no walk. Only the forms a reader reaches for are taught -- a phrase, &, !, a star, a saved search
+; ranked best first. NEAR is heard inside the Guide Dogs search, not typed; ^, column groups and the index's own
+; capital-letter syntax are left to the guide. Counts come from the November 2026 build; a live run confirms them.
+
+[about]
+Title=7 - Search a Library
+Intro=TalkingBookTopics, sixty thousand books the National Library Service announced, searched by whole words: a phrase, two words at once, a word left out, a word's start; a saved search that puts the best matches first; one of the magazine's own news articles read as a web page; and books marked and written up as a wish list.
+Setup=DbDo is open.
+Homework=Find three books on a subject you love, mark them, and run the Wish List.
+
+[step]
+
+Say=One want: a few good books on a subject I care about, from a library of sixty thousand, and a list of them to keep.
+Key=
+Hear=
+
+[step]
+
+Say=Control plus Shift plus O, Open Template Database, lists the templates.
+Key=Control+Shift+O
+Hear=Open Template Database dialog
+Hear=BookTrail
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose TalkingBookTopics: every book the National Library Service announced in its magazine, Talking Book Topics, since 1997, with its author, narrator, book number and description. Enter.
+Key=Enter
+Hear=A Is for Alibi, Sue Grafton, Row 1 of 60159
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Keywords, Control plus K, finds letters anywhere, so art also finds start and party. In a library this size, whole words serve better. Control plus F, Filter Records.
+Key=Control+F
+Hear=Filter Records dialog
+Hear=Keywords match button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A table with a full-text index offers Full-text match, the second button. F for Full-text.
+Key=F
+Hear=Full-Text Match dialog
+Hear=Words to find: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Two words typed together are a phrase. I type civil war and press Enter.
+Key=Enter
+Hear=623 records match.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Only books that say civil war, not every book with civil in one place and war in another. Down Arrow.
+Key=Down Arrow
+Hear=Abraham Lincoln and the Civil War, Row 2 of 623
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The same marks as Keywords work here: an ampersand means both, a bar means either, an exclamation point leaves a word out, and a star ends a word's start. Control plus F, and S for Start over.
+Key=Control+F
+Hear=Filter Records dialog
+Hear=Start over button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=S, then F for Full-text.
+Key=S
+Hear=Full-Text Match dialog
+Hear=Words to find: edit, civil war
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type mystery, ampersand, scotland, ampersand, exclamation point, violence: mysteries set in Scotland, leaving out the violent ones. Enter.
+Key=Enter
+Hear=24 records match.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: a search for scot, hoping for Scotland. Full-text match finds whole words, so scot finds only scot. Scot with a star finds Scotland and Scottish.
+Key=
+Hear=
+
+[step]
+
+Say=Control plus Shift plus F clears the filter. A saved search can also rank its matches, best first, and read the passage that matched. Alt plus V, Invoke Script.
+Key=Alt+V
+Hear=Invoke Script dialog
+Hear=Blindness
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Guide Dogs finds guide within three words of dog, in any order. I choose it and press Enter.
+Key=Enter
+Hear=Love on a Leash, Row 1 of 41
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A word in a title counts most, then the author and the narrator, then the description, so the books most about guide dogs come first. Right Arrow to the passage.
+Key=Right Arrow
+Hear=passage, a blind woman and her guide dog travel
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. The magazine also printed its own news, In Brief: new services, BARD, the move from cassettes to digital players. Control plus T, Open Table, and I choose updates.
+Key=Control+T
+Hear=Open Table dialog
+Hear=authors
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=U for updates, and Enter. Each row is one article, newest first.
+Key=Enter
+Hear=Talking Book Topics now on BARD, Row 1 of 612
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=An article is written in Markdown, with headings, lists and links. Control plus Shift plus H, Preview Markdown in Web Browser, shows it as a web page.
+Key=Control+Shift+H
+Hear=Talking Book Topics now on BARD, web page
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The browser's own keys read it, H for the next heading. Alt plus F4 closes the page and comes back. Now a list to keep: back on books, Semicolon marks a book I want.
+Key=SemiColon
+Hear=Marked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Marks stay, so a list grows over days. Alt plus Shift plus R, Run Report, and I choose Wish List.
+Key=Alt+Shift+R
+Hear=Run Report dialog
+Hear=Wish List
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. Every marked book, with its author, narrator, book number, length and description, and a link to download it from BARD.
+Key=Enter
+Hear=Wish List, web page
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Keep the records whose words match.
+Key=
+Hear=Control plus F, then F
+
+[step]
+
+Say=Run a saved search, best first.
+Key=
+Hear=Alt plus V
+
+[step]
+
+Say=Show a Markdown field as a web page.
+Key=
+Hear=Control plus Shift plus H
+
+[step]
+
+Say=Mark a record.
+Key=
+Hear=Semicolon
+
+[step]
+
+Say=Write the marked records up.
+Key=
+Hear=Alt plus Shift plus R

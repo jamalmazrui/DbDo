@@ -750,7 +750,11 @@ def build(lIssues, sPorter, sOut):
     # Full-text match writes it (toFullText, the kit's Search.toFullText in Python), and its count logged. A search FTS5
     # refuses (the first draft had four: NEAR takes no OR, and a group in parentheses needs AND beside it) or one that
     # finds nothing is caught by the build, not by a reader, and named in the coverage notes.
-    sGuide = os.path.join(sProject, "help", "DbDo.md")
+    # THE EXAMPLES MOVED TO NOTES (27 November 2026, Jamal's ruling): the magazine archives are named in no public DbDo
+    # document, so their search guide is notes\\MagazineArchives.md, kept on the development computer. help\\DbDo.md is
+    # still read when the notes file is missing, for an older copy of the project.
+    sGuide = os.path.join(sProject, "notes", "MagazineArchives.md")
+    if not os.path.isfile(sGuide): sGuide = os.path.join(sProject, "help", "DbDo.md")
     sGuideText = io.open(sGuide, encoding="utf-8-sig").read() if os.path.isfile(sGuide) else ""
     oPart = re.search(r"(?ms)^#### Searching %s\s*$(.*?)(?=^#{1,4} )" % sSource, sGuideText + "\n#### end\n")
     if oPart:
@@ -774,7 +778,7 @@ def build(lIssues, sPorter, sOut):
         for sExample in lsRefused: dReport["examples"].append("Refused by FTS5: " + sExample)
         for sExample in lsEmpty: dReport["examples"].append("Found nothing: " + sExample)
     else:
-        log("EXAMPLES: help\\DbDo.md has no Searching %s part, so no example was tried" % sSource)
+        log("EXAMPLES: %s has no Searching %s part, so no example was tried" % (sGuide, sSource))
     log("BUILT %s: %s, %s, tokenizer %s; problems: %s" % (sTemp, plural(len(lIssues), "issue"), plural(iArticles, "article"), sTokenize, "; ".join(lsProblems) or "none"))
     oDb.close()
     if lsProblems: raise RuntimeError("the new database failed its checks, so the old one was kept: " + "; ".join(lsProblems))

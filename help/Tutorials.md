@@ -56,7 +56,7 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [4 - Track Job Leads](#4-track-job-leads)
 - [5 - Catalog Your Books](#5-catalog-your-books)
 - [6 - Explore Music](#6-explore-music)
-- [7 - More Templates](#7-more-templates)
+- [7 - Search a Library](#7-search-a-library)
 - [8 - Analyze a Dataset](#8-analyze-a-dataset)
 - [9 - Conclusion](#9-conclusion)
 - [1. Where to Go Next](#1-where-to-go-next)
@@ -940,7 +940,7 @@ Screen reader:
 
 ### Step 10
 
-Four more get a shorter visit in walk seven: TechTraining, BlindCreations, ContactTrail and RecipeTrail.
+Walk seven searches TalkingBookTopics, sixty thousand books from the National Library Service, by whole words. More wait in Open Template Database: TechTraining, BlindCreations, DescribedFilms, ContactTrail and RecipeTrail.
 
 ### Step 11
 
@@ -1042,19 +1042,19 @@ Screen reader:
 
 ### Step 25
 
-Seven, More Templates.
+Seven, Search a Library.
 
 Screen reader:
 
-- TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing your copy up to date when a template improves.
+- Sixty thousand talking books searched by whole words, the best matches first, a news article read as a web page, and a wish list of marked books.
 
 ### Step 26
 
-Eight, Analyze a Dataset: the Titanic's passengers, the list the pandas tutorials use, filtered, averaged by group, counted, given a new column, asked in SQL and charted.
+Eight, Analyze a Dataset: the Titanic's passengers, the list the pandas tutorials use, filtered, averaged by group, counted, given a new column and charted.
 
 Screen reader:
 
-- A dataset brought in, asked in SQL and in plain words, grouped, related and handed on.
+- A dataset brought in, profiled, filtered, grouped, counted, charted and handed on.
 
 ### Step 27
 
@@ -1293,11 +1293,11 @@ What this walk taught. I name the command; the reader gives the key.
 
 ### Step 27
 
-Say Status.
+Say how many records are in view.
 
 Screen reader:
 
-- Shift plus Z
+- Alt plus Y
 
 ### Step 28
 
@@ -2467,164 +2467,253 @@ Screen reader:
 
 **Something to try:** Pick a genre you love, and follow one album to everyone who made it.
 
-## 7 - More Templates
+## 7 - Search a Library
 
-Five more ready-made databases in brief -- a lesson to play from TechTraining, a creator and their work in BlindCreations, a described movie in DescribedFilms, the emergency list in ContactTrail, a shopping list from RecipeTrail -- and how to bring your copy of any template up to date when DbDo improves it.
+TalkingBookTopics, sixty thousand books the National Library Service announced, searched by whole words: a phrase, two words at once, a word left out, a word's start; a saved search that puts the best matches first; one of the magazine's own news articles read as a web page; and books marked and written up as a wish list.
 
 **Before you start:** DbDo is open.
 
 ### Step 1
 
-One want: to know what else is ready-made, and keep my copies current.
+One want: a few good books on a subject I care about, from a library of sixty thousand, and a list of them to keep.
 
-### Step 2: Enter
+### Step 2: Control+Shift+O
 
-TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Control plus Shift plus O, Open Template Database, and I choose TechTraining.
+Control plus Shift plus O, Open Template Database, lists the templates.
 
 Screen reader:
 
-- 2026, A Demonstration and Walkthrough of Be My Eyes for Mac, AppleVis, Row 1 of 1167
+- Open Template Database dialog
+- BookTrail
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 3: Enter
 
-A few minutes free? Alt plus V, Invoke Script, and Quick Lessons: the ones that play in fifteen minutes or less, shortest first.
+I choose TalkingBookTopics: every book the National Library Service announced in its magazine, Talking Book Topics, since 1997, with its author, narrator, book number and description. Enter.
 
 Screen reader:
 
-- Accessible Design is Good Design (Part 3) -- At a Glance, 1, video, Row 1 of 372
+- A Is for Alibi, Sue Grafton, Row 1 of 60159
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 4: Control+P
+### Step 4: Control+F
 
-Control plus P, Play Media, plays a presentation as it plays a station.
+Keywords, Control plus K, finds letters anywhere, so art also finds start and party. In a library this size, whole words serve better. Control plus F, Filter Records.
 
 Screen reader:
 
-- Homer Player, Accessible Design is Good Design (Part 3) -- At a Glance
+- Filter Records dialog
+- Keywords match button
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 5: Control+T
+### Step 5: F
 
-Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Control plus Shift plus O, BlindCreations, and Control plus T to the creators.
+A table with a full-text index offers Full-text match, the second button. F for Full-text.
 
 Screen reader:
 
-- Open Table dialog
+- Full-Text Match dialog
+- Words to find: edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 6: Enter
 
-I choose creators, then Control plus J to the last name Bishop.
+Two words typed together are a phrase. I type civil war and press Enter.
 
 Screen reader:
 
-- Jeff, Bishop, Row 7 of 133
+- 623 records match.
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Shift+W
+### Step 7: Down Arrow
 
-Shift plus W, Say Whole Record, ends with what this creator made, in each kind.
+Only books that say civil war, not every book with civil in one place and war in another. Down Arrow.
 
 Screen reader:
 
-- apps 4, presentations 3
+- Abraham Lincoln and the Civil War, Row 2 of 623
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 8
+### Step 8: Control+F
 
-Alt plus Right Arrow goes into any of them, as with the band in MusicTrail. Escape. DescribedFilms lists about ten thousand English movies with audio description, from the American Council of the Blind's Audio Description Project. Each row says the title, the year and the services that carry it, and Alt plus Right Arrow lists each service's terms and link.
+The same marks as Keywords work here: an ampersand means both, a bar means either, an exclamation point leaves a word out, and a star ends a word's start. Control plus F, and S for Start over.
 
-### Step 9
+Screen reader:
 
-ContactTrail keeps people and the groups they belong to. Its Emergency Contacts script lists everyone in the Emergency group, with every number.
+- Filter Records dialog
+- Start over button
 
-### Step 10
+Confirm the wording with a live run: buildTutorials -live.
 
-RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Semicolon, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
+### Step 9: S
+
+S, then F for Full-text.
+
+Screen reader:
+
+- Full-Text Match dialog
+- Words to find: edit, civil war
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+I type mystery, ampersand, scotland, ampersand, exclamation point, violence: mysteries set in Scotland, leaving out the violent ones. Enter.
+
+Screen reader:
+
+- 24 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 11
 
-Now the copies. The first time you open a template, DbDo gives you your own copy, so nothing you change touches the original. When a new DbDo brings an improved template, more stations or a new script, your copy stays as you left it.
+A planned misstep: a search for scot, hoping for Scotland. Full-text match finds whole words, so scot finds only scot. Scot with a star finds Scotland and Scottish.
 
-### Step 12: U
+### Step 12: Alt+V
 
-To take the improvements, open your copy, and from the Help menu choose Update from Template. Alt plus H, then U.
-
-Screen reader:
-
-- Update from Template dialog
-- Merge button
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 13: Tab
-
-Two buttons. Merge adds what the template has and your copy lacks, and keeps everything of yours; it asks first what to do about records both have, and Add new only, the first choice, changes none of yours.
+Control plus Shift plus F clears the filter. A saved search can also rank its matches, best first, and read the passage that matched. Alt plus V, Invoke Script.
 
 Screen reader:
 
-- Replace button
+- Invoke Script dialog
+- Blindness
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14
+### Step 13: Enter
 
-Replace makes your copy the template again, and keeps your copy as it was beside it, as a dated backup, so nothing is lost. Either way, a new script or report in the template is added beside your copy.
-
-### Step 15: Escape
-
-A planned misstep: choosing Replace for a copy full of your own records. Merge is the first button, so Enter takes it; Escape leaves without a change.
+Guide Dogs finds guide within three words of dog, in any order. I choose it and press Enter.
 
 Screen reader:
 
-- DbDo ready
+- Love on a Leash, Row 1 of 41
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16
+### Step 14: Right Arrow
+
+A word in a title counts most, then the author and the narrator, then the description, so the books most about guide dogs come first. Right Arrow to the passage.
+
+Screen reader:
+
+- passage, a blind woman and her guide dog travel
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+T
+
+Escape. The magazine also printed its own news, In Brief: new services, BARD, the move from cassettes to digital players. Control plus T, Open Table, and I choose updates.
+
+Screen reader:
+
+- Open Table dialog
+- authors
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Enter
+
+U for updates, and Enter. Each row is one article, newest first.
+
+Screen reader:
+
+- Talking Book Topics now on BARD, Row 1 of 612
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+H
+
+An article is written in Markdown, with headings, lists and links. Control plus Shift plus H, Preview Markdown in Web Browser, shows it as a web page.
+
+Screen reader:
+
+- Talking Book Topics now on BARD, web page
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: SemiColon
+
+The browser's own keys read it, H for the next heading. Alt plus F4 closes the page and comes back. Now a list to keep: back on books, Semicolon marks a book I want.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+Shift+R
+
+Marks stay, so a list grows over days. Alt plus Shift plus R, Run Report, and I choose Wish List.
+
+Screen reader:
+
+- Run Report dialog
+- Wish List
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Enter
+
+Enter. Every marked book, with its author, narrator, book number, length and description, and a link to download it from BARD.
+
+Screen reader:
+
+- Wish List, web page
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 17
+### Step 22
 
-Run a saved script.
+Keep the records whose words match.
+
+Screen reader:
+
+- Control plus F, then F
+
+### Step 23
+
+Run a saved search, best first.
 
 Screen reader:
 
 - Alt plus V
 
-### Step 18
+### Step 24
 
-Play the record.
-
-Screen reader:
-
-- Control plus P
-
-### Step 19
-
-Say what a record leads to.
+Show a Markdown field as a web page.
 
 Screen reader:
 
-- Shift plus W
+- Control plus Shift plus H
 
-### Step 20
+### Step 25
 
-Update your copy from its template.
+Mark a record.
 
 Screen reader:
 
-- Alt plus H, then U
+- Semicolon
 
-**Something to try:** Open the template nearest your own life and make one record your own.
+### Step 26
+
+Write the marked records up.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Find three books on a subject you love, mark them, and run the Wish List.
 
 ## 8 - Analyze a Dataset
 
@@ -3224,12 +3313,22 @@ Screen reader:
 - JobTrail, to search for work
 - BookTrail, to read
 - MusicTrail, to explore
+- TalkingBookTopics, to search
 
 ### Step 5
 
-Now the words, in alphabetical order. I say the term; the reader says what it means.
+When a template improves, Update from Template offers two buttons; Merge, the first, adds what is new and keeps all of yours. And when someone shares a DbDo database, Get Database brings it in from its path or web address.
+
+Screen reader:
+
+- Update from Template: Alt plus H, then U
+- Get Database: Alt plus F, then G
 
 ### Step 6
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 7
 
 filter.
 
@@ -3237,7 +3336,15 @@ Screen reader:
 
 - A condition that hides the records not matching it, until it is cleared.
 
-### Step 7
+### Step 8
+
+full-text search.
+
+Screen reader:
+
+- A search of whole words through an index, across every record at once: a phrase, either word, a word left out, the best matches first.
+
+### Step 9
 
 link.
 
@@ -3245,7 +3352,7 @@ Screen reader:
 
 - A row in the maps table that ties one record to another, with a kind, such as recorded or member of.
 
-### Step 8
+### Step 10
 
 mark.
 
@@ -3253,7 +3360,7 @@ Screen reader:
 
 - A flag on a record, for a later command to act on; Semicolon sets it, and Slash clears it.
 
-### Step 9
+### Step 11
 
 order.
 
@@ -3261,7 +3368,7 @@ Screen reader:
 
 - The sort of the list, by a column, ascending or reversed.
 
-### Step 10
+### Step 12
 
 pick list.
 
@@ -3269,7 +3376,7 @@ Screen reader:
 
 - A field's fixed values, offered by Control plus F2, so nothing is mistyped.
 
-### Step 11
+### Step 13
 
 prime.
 
@@ -3277,7 +3384,7 @@ Screen reader:
 
 - The key DbDo builds from a record itself, by which links and merges find it.
 
-### Step 12
+### Step 14
 
 query.
 
@@ -3285,7 +3392,7 @@ Screen reader:
 
 - A question in SQL, answered as a table.
 
-### Step 13
+### Step 15
 
 record.
 
@@ -3293,7 +3400,7 @@ Screen reader:
 
 - One row: one station, one job, one book.
 
-### Step 14
+### Step 16
 
 related records.
 
@@ -3301,7 +3408,7 @@ Screen reader:
 
 - The records a record leads to, through a link or a shared key.
 
-### Step 15
+### Step 17
 
 report.
 
@@ -3309,7 +3416,7 @@ Screen reader:
 
 - A saved layout that writes records as a document.
 
-### Step 16
+### Step 18
 
 Say key.
 
@@ -3317,7 +3424,7 @@ Screen reader:
 
 - Shift and a letter: it asks and changes nothing.
 
-### Step 17
+### Step 19
 
 script.
 
@@ -3325,7 +3432,7 @@ Screen reader:
 
 - A saved question beside a database, run with Alt plus V.
 
-### Step 18
+### Step 20
 
 SQLite.
 
@@ -3333,7 +3440,7 @@ Screen reader:
 
 - The database format DbDo opens: one file, with its tables inside.
 
-### Step 19
+### Step 21
 
 template database.
 
@@ -3341,7 +3448,7 @@ Screen reader:
 
 - A ready-made database that comes with DbDo, opened with Control plus Shift plus O; you work in your own copy of it.
 
-### Step 20
+### Step 22
 
 Last, more information. Help is built in. The guide, and what changed.
 
@@ -3350,7 +3457,7 @@ Screen reader:
 - F1, the guide
 - Control plus Shift plus F1, History
 
-### Step 21
+### Step 23
 
 The version, and what any key does without doing it.
 
@@ -3359,11 +3466,11 @@ Screen reader:
 - Alt plus F1, About
 - Control plus F1, Key Describer
 
-### Step 22
+### Step 24
 
 Every command in one list, and these walks again: Alt plus F10, and Play Tutorials on the Help menu.
 
-### Step 23
+### Step 25
 
 DbDo dot md, the guide, explains every command and the ideas behind it; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
 

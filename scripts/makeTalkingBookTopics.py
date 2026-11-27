@@ -45,7 +45,7 @@ sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
 import makeBrailleForum as core
 
-sVersion = "2026-11-27 version 4: sources only from their own marks; ranked by stored weights; no prefix indexes; vacuumed; sizes logged"
+sVersion = "2026-11-27 version 5: In Brief articles as Markdown in updates; field sizes logged; the guide's search examples run"
 sSource = "TalkingBookTopics"
 sUserAgent = "DbDo makeTalkingBookTopics/1 (+https://github.com/JamalMazrui/DbDo; a searchable list of NLS Talking Book Topics books)"
 sProject = core.sProject
@@ -55,6 +55,7 @@ sCoveragePath = os.path.join(sProject, "logs", "DbDo-tbtCoverage-%s.md" % sStamp
 sDataDir = os.path.join(sProject, "data", sSource)
 sPilotPath = os.path.join(sDataDir, sSource + "-pilot.db")
 sTemplatePath = os.path.join(sProject, "templates", sSource, sSource + ".db")
+sPandoc = ""
 core.sLogPath = sLogPath
 core.trail.sLogPath = sLogPath
 core.iHeartbeatSeconds = 10
@@ -314,6 +315,89 @@ def entryOf(lBlock, sHeading):
     return dBook
 
 
+# ---------------------------------------------------------------- In Brief, the magazine's news
+
+# IN BRIEF AS MARKDOWN (version 5, 27 November 2026, Jamal: "Control+Shift+H has nothing to work on ... Could we populate
+# a new textmarkdown field with meaningful text?"). Version 4's log found an In Brief section in 149 of 175 issues: NLS's
+# own short articles -- new services, BARD, the move from cassettes to digital players. They are federal work, free to
+# keep, and already in the saved pages, so nothing new is fetched. Each becomes a row of updates, its words as Markdown
+# in body (Preview Markdown, Control+Shift+H, shows them as a web page) and as plain words in search_text for the index.
+# HOW THE SECTION IS FOUND. A web issue goes through Pandoc whole; a text issue's lines are joined into paragraphs. The
+# section starts at a line that is just "In Brief" (a heading, bold or alone -- not a contents link) and ends at the first
+# of the book sections. Inside it, a heading, a line all in bold or one wrapped in underscores starts an article.
+oBriefStart = re.compile(r"^in brief$", re.I)
+oBriefEnd = re.compile(r"^(books for (adults|children|young (people|readers))|adult (non)?fiction|children'?s (books|non ?fiction|fiction)|"
+                       r"audio magazines|magazines|nonfiction|fiction|order form|about talking book topics)\b", re.I)
+oTitleLine = re.compile(r"^(#{1,6}\s+.+|\*\*[^*]+\*\*|__[^_]+__|_[^_]+_)$")
+
+
+def bareLine(sLine):
+    """A Markdown line's words, without heading marks, emphasis or a trailing colon."""
+    sLine = re.sub(r"^#{1,6}\s+", "", sLine.strip())
+    sLine = re.sub(r"\{[^}]*\}$", "", sLine).strip()
+    return sLine.strip("*_ ").rstrip(":").strip()
+
+
+def plainWords(sMarkdown):
+    """Markdown as plain words for the full-text index: link text kept, addresses and marks dropped."""
+    sText = re.sub(r"\\([\\`*_{}\[\]()#+\-.!'\"<>|])", r"\1", sMarkdown)
+    sText = re.sub(r"!\[[^\]]*\]\([^)]*\)", " ", sText)
+    sText = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", sText)
+    sText = re.sub(r"<https?://[^>]+>|https?://\S+", " ", sText)
+    sText = re.sub(r"[#*_>`|\\]", " ", sText)
+    return re.sub(r"\s+", " ", sText).strip()
+
+
+def markdownLines(sText, bHtml):
+    """An issue as Markdown lines, one paragraph or heading a line."""
+    if bHtml:
+        if not sPandoc: return []
+        sMarkdown = core.toMarkdown(sPandoc, [sText])[0]
+        lsLines, lsParagraph = [], []
+        for sLine in sMarkdown.split("\n") + [""]:
+            if sLine.strip(): lsParagraph.append(sLine.strip()); continue
+            if lsParagraph: lsLines.append(" ".join(lsParagraph)); lsParagraph = []
+        return lsLines
+    lsLines, lsParagraph = [], []
+    for sLine in sText.splitlines() + [""]:
+        sLine = sLine.strip()
+        if sLine and not oTitleLine.match(sLine) and not oBriefStart.match(bareLine(sLine)):
+            lsParagraph.append(sLine); continue
+        if lsParagraph: lsLines.append(" ".join(lsParagraph)); lsParagraph = []
+        if sLine: lsLines.append(sLine)
+    return lsLines
+
+
+def briefArticles(sText, bHtml, sKey):
+    """The In Brief articles of one issue: (title, Markdown body), in printed order."""
+    try:
+        lsLines = markdownLines(sText, bHtml)
+    except Exception as oError:
+        log("BRIEF %s: not read (%s)" % (sKey, oError))
+        return []
+    iStart = next((i for i, s in enumerate(lsLines) if oBriefStart.match(bareLine(s)) and "](" not in s
+                   and i + 1 < len(lsLines) and not oBriefEnd.match(bareLine(lsLines[i + 1]))), -1)
+    if iStart < 0: return []
+    lArticles, sTitle, lsBody = [], "", []
+    def keep():
+        sBody = "\n\n".join(s for s in lsBody if not re.match(r"^\[?back to top", s, re.I))
+        if len(plainWords(sBody).split()) >= 15:
+            lArticles.append((sTitle or "In Brief", sBody))
+        elif sBody:
+            log("BRIEF %s: a part too short to keep, %s: %s" % (sKey, sTitle or "untitled", plainWords(sBody)[:120]))
+    for sLine in lsLines[iStart + 1:]:
+        sBare = bareLine(sLine)
+        if oBriefEnd.match(sBare) and (oTitleLine.match(sLine) or len(sBare) < 40): break
+        if oTitleLine.match(sLine) and len(sBare) < 120:
+            keep()
+            sTitle, lsBody = sBare, []
+            continue
+        lsBody.append(sLine)
+    keep()
+    if len(lArticles) > 20: log("BRIEF %s: %d articles, more than expected; the first is %s" % (sKey, len(lArticles), lArticles[0][0]))
+    return lArticles
+
+
 def readIssue(oCache, dIssue, iSamples):
     """The books of one issue, with counts for the coverage report."""
     dResult = oCache.fetch(dIssue["fetch"])
@@ -322,6 +406,8 @@ def readIssue(oCache, dIssue, iSamples):
         log("ISSUE %s %s: nothing fetched (%s)" % (dIssue["key"], dIssue["fetch"], dResult.get("error", "")))
         return []
     sText = core.decoded(binBody)
+    dIssue["updates"] = briefArticles(sText, dIssue["html"], dIssue["key"])
+    if dIssue["updates"]: log("BRIEF %s: %s: %s" % (dIssue["key"], plural(len(dIssue["updates"]), "article"), " | ".join(t for t, _ in dIssue["updates"])[:400]))
     lLines = pageLines(sText, dIssue["html"])
     lBooks, lBlock, sBlockHeading = [], [], ""
     iNumberLines = 0
@@ -413,6 +499,12 @@ def buildDatabase(lIssues, sOut):
                                                          "issue", "issue_id", "annotation", "annotation_source"], ["title", "author"], ["title", "author", "number"], dBookTypes):
         oDb.execute(sStatement)
     oDb.execute("CREATE INDEX idx_books_issue_id ON books (issue_id)")
+    # UPDATES (version 5): the In Brief articles. Not "briefs" or "articles", whose first letters books and authors
+    # already take, so typing u in the list of tables reaches it at once.
+    dUpdateTypes = {"title": "TEXTLINE", "issue": "TEXTLINE", "issue_id": "INTEGER", "published": "TEXTLINE", "position": "INTEGER",
+                    "body": "TEXTMARKDOWN", "search_text": "TEXTMEMO"}
+    for sStatement in trail.tableDdl("updates", "update_id", ["title", "issue", "published", "position", "body", "search_text", "issue_id"],
+                                     ["title"], ["published", "position", "title"], dUpdateTypes): oDb.execute(sStatement)
     # AUTHORS AND NARRATORS (version 3, the plan's people tables): one row a person, with how many books and the first and
     # last issue, mapped to each book by maps rows -- written_by and read_by -- as BrailleMonitor maps writers to articles.
     dPeopleTypes = {"name": "TEXTLINE", "books": "INTEGER", "first_issue": "TEXTLINE", "last_issue": "TEXTLINE"}
@@ -432,6 +524,13 @@ def buildDatabase(lIssues, sOut):
                          d["annotation_source"], "\n".join(d["tags"]) or None, d["url"] or None))
             if oCursor.rowcount: iBooks += 1
             else: log("PRIME %s: %s by %s, %s, is already in the pilot" % (dIssue["key"], d["title"], d["author"], d["number"]))
+        for iPosition, (sTitle, sBody) in enumerate(dIssue.get("updates", []), 1):
+            oDb.execute("INSERT OR IGNORE INTO updates (title, issue, published, position, body, search_text, issue_id, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        (sTitle, issueTitle(dIssue["date"]), "%04d-%02d-01" % (dIssue["date"][0], dIssue["date"][1]), iPosition, sBody,
+                         plainWords(sBody), iIssue, dIssue["url"]))
+    iUpdates = oDb.execute("SELECT count(*) FROM updates").fetchone()[0]
+    log("UPDATES %s from %s" % (plural(iUpdates, "In Brief article"), plural(sum(1 for d in lIssues if d.get("updates")), "issue")))
+    say("In Brief: %s." % plural(iUpdates, "article"))
     for sTable, sField, sKind, sMeaning in (("authors", "author", "written_by", "The book (subject) was written by the author (object), as the magazine names them."),
                                             ("narrators", "narrator", "read_by", "The book (subject) was read by the narrator (object), as the magazine names them.")):
         dPeople = collections.OrderedDict()
@@ -479,6 +578,12 @@ def buildDatabase(lIssues, sOut):
                 log("SEARCH %s: %s" % (sMatch, plural(iHits, "book")))
             except Exception as oError:
                 log("SEARCH %s failed: %s" % (sMatch, oError))
+        # THE IN BRIEF INDEX (version 5): title and plain words, title counting most; body stays Markdown, to read.
+        sUpdatesFts = core.homerFts.createIndex(oDb, "updates", "update_id", ["title", "search_text"], sPrefix="")
+        oDb.execute("INSERT INTO updates_fts (updates_fts, rank) VALUES ('rank', 'bm25(5.0, 1.0)')")
+        core.homerFts.optimize(oDb, sUpdatesFts)
+        log("FTS %s: %s" % (sUpdatesFts, core.homerFts.integrityProblem(oDb, sUpdatesFts) or "sound"))
+        runGuideExamples(oDb)
     else:
         log("FTS: this SQLite has no FTS5")
     oDb.commit()
@@ -489,12 +594,51 @@ def buildDatabase(lIssues, sOut):
         for sName, iBytes in oDb.execute("SELECT name, sum(pgsize) FROM dbstat GROUP BY name ORDER BY 2 DESC LIMIT 12").fetchall():
             log("SIZE %s: %s KB" % (sName, "{:,}".format(iBytes // 1024)))
     except Exception as oError:
-        log("SIZE: dbstat is not in this SQLite (%s)" % oError)
+        # FIELD SIZES WITHOUT DBSTAT (version 5): the Python of version 4's run lacked dbstat, so each text field's
+        # bytes are summed instead -- the table's own words, before the index.
+        log("SIZE: dbstat is not in this SQLite (%s); field sizes instead" % oError)
+        for sTable in ("books", "updates", "authors", "narrators", "issues", "maps", "defs"):
+            for oCol in oDb.execute('PRAGMA table_info("%s")' % sTable).fetchall():
+                iBytes = oDb.execute('SELECT coalesce(sum(length(CAST("%s" AS BLOB))), 0) FROM "%s"' % (oCol[1], sTable)).fetchone()[0]
+                if iBytes >= 1024 * 100: log("SIZE %s.%s: %s KB" % (sTable, oCol[1], "{:,}".format(iBytes // 1024)))
     oDb.close()
     log("SIZE file: %s KB" % "{:,}".format(os.path.getsize(sNew) // 1024))
     if os.path.exists(sOut): os.remove(sOut)
     os.replace(sNew, sOut)
     return iBooks, sFts
+
+
+def runGuideExamples(oDb):
+    """EVERY EXAMPLE IN THE GUIDE IS RUN (version 5), as makeBrailleForum runs its own: each search in backticks in the
+    "Searching TalkingBookTopics" part of help\\DbDo.md -- which the tutorials teach too -- is tried on the new database as
+    Full-text match runs it, and its count logged, so a refused or empty example is caught by the build, not a reader."""
+    sGuide = os.path.join(sProject, "help", "DbDo.md")
+    sText = open(sGuide, encoding="utf-8-sig").read() if os.path.isfile(sGuide) else ""
+    oPart = re.search(r"(?ms)^#### Searching %s\s*$(.*?)(?=^#{1,4} )" % sSource, sText + "\n#### end\n")
+    if not oPart:
+        log("EXAMPLES: help\\DbDo.md has no Searching %s part" % sSource)
+        return
+    iRun, iBad = 0, 0
+    for sTable, sKey, sIndex in (("books", "book_id", "books_fts"), ("updates", "update_id", "updates_fts")):
+        lsFields = [r[1] for r in oDb.execute('PRAGMA table_info("%s")' % sTable)]
+        lsIndexColumns = [r[1] for r in oDb.execute('PRAGMA table_info("%s")' % sIndex)]
+        sPart = oPart.group(1)
+        # An example after the words "Searches of In Brief" searches updates; the rest search books.
+        iSplit = sPart.find("Searches of In Brief")
+        sPart = sPart[iSplit:] if sTable == "updates" and iSplit >= 0 else (sPart[:iSplit] if iSplit >= 0 else sPart)
+        if sTable == "updates" and iSplit < 0: continue
+        for sExample in re.findall(r"^[ \t]*- (?:\*\*[^*\n]+\*\*[^`\n]*)?`([^`\n]+)`", sPart, re.M):
+            iRun += 1
+            try:
+                sWhere = ('"%s" IN (SELECT rowid FROM "%s" WHERE "%s" MATCH \'%s\')' % (sKey, sIndex, sIndex, sExample.replace("'", "''"))
+                          if core.isFullTextSyntax(sExample) else core.patternWhere(sExample, lsFields, sIndex, sKey, lsIndexColumns))
+                iHits = oDb.execute('SELECT count(*) FROM "%s" WHERE %s' % (sTable, sWhere)).fetchone()[0]
+                log("EXAMPLE %s %s: %s" % (sTable, plural(iHits, "row"), sExample))
+                if not iHits: iBad += 1
+            except Exception as oError:
+                iBad += 1
+                log("EXAMPLE REFUSED %s (%s): %s" % (sTable, oError, sExample))
+    say("The guide's search examples: %s tried, %d refused or empty; the log gives each count." % (plural(iRun, "example"), iBad))
 
 
 def writeCoverage(dIssues, dKinds, lRead, sPath):
@@ -559,6 +703,11 @@ def main(lsArgs):
     log("settings: %s; offline %s; delay %.1f s; data %s; out %s" % ("pilot of %d issues" % iLimit if iLimit else "every issue", bOffline, nDelay, sDataDir, sOut))
     say("Talking Book Topics: finding the issues, then reading %s. %s" % ("%d of them" % iLimit if iLimit else "all of them",
         "A few minutes." if iLimit else "The first time takes about ten minutes; saved pages are not asked for again."))
+    # PANDOC FOR IN BRIEF (version 5): the kit's, found or installed as makeBrailleForum finds it. Without it, the web
+    # issues' In Brief articles are left out and the log says so; the books are built all the same.
+    global sPandoc
+    sPandoc = core.pandocPath()
+    log("PANDOC %s" % (sPandoc or "not found: web issues' In Brief articles are left out"))
     oCache = core.homerFetch.Cache(sDataDir, fLog=log, nDelay=nDelay, iTimeout=60, iRetries=3, sUserAgent=sUserAgent, bOffline=bOffline)
     dIssues, dKinds = discoverIssues(oCache, bOffline)
     oCache.save()

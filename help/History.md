@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 27 November 2026, late afternoon -- In Brief, and a walk for searching
+
+- **TalkingBookTopics gains the magazine's news.** A new table, updates, holds the In Brief articles: new services, BARD, the move from cassettes to digital players. Each is Markdown, so Preview Markdown in Web Browser (Control+Shift+H) shows it as a web page with its headings and links. It has its own full-text index and a saved search, Digital-Players, and opens newest first.
+- **The guide has a TalkingBookTopics part,** with searches to try. The build runs every one and logs how many records it finds.
+- **Walk 7 is now Search a Library.** It searches TalkingBookTopics by whole words: a phrase, both words, a word left out, a word's start. Then it runs a saved search that puts the best matches first, shows an In Brief article as a web page, and writes marked books up as a Wish List. The tour of five templates it replaces is now a sentence in the overview.
+- **Walks 0, 1 and 9 brought up to date.** The overview no longer promises SQL, which walk 8 left out. Walk 1's quiz asks for Say Yield, since Say Status was retired. The conclusion adds Get Database and full-text search.
+- **The build logs each field's size** when its SQLite cannot measure tables, as on the last run.
+
+
 ## 27 November 2026, afternoon -- Talking Book Topics, tuned
 
 - **Searches list the best matches first.** The template stores how much each field counts: a word in a title counts most, then author, narrator and category, then description and tags. The saved searches sort by that.
@@ -12,12 +21,12 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 - **The template is smaller.** It drops the extra word-start indexes, which searches with an asterisk did not need, and is compacted when built. The build log lists the size of each table and index.
 - **Pick lists for fixed values**: audience, fiction or nonfiction, description source, and issue kind.
 - **A Wish List report** prints the books you mark, with author, narrator, number, length, issue, BARD url and description.
-- **Describing fields skips full-text indexes** and their hidden tables, so it no longer warns about them in BrailleForum or TalkingBookTopics.
+- **Describing fields skips full-text indexes** and their hidden tables, so it no longer warns about them in any template.
 
 
 ## 27 November 2026, midday -- Talking Book Topics, the whole template
 
-- **TalkingBookTopics is built from every issue found**, 1997 to mid-2017 from the web archive and 2023 on from loc.gov: each book with its title, author, narrator, number, length, year, category and advisories, a full-text index on them, and authors and narrators tables linked to their books. NLS's own descriptions are kept; descriptions NLS took from publishers, Goodreads or Amazon are not, and annotation_source says whose they were. Saved searches show the forms a full-text search takes: Blindness, Civil-War-Nonfiction, Guide-Dogs, Mysteries-in-Scotland, No-Strong-Language and Space-Flight, with Books-By-Year and Narrators. It stays on the development computer, like BrailleForum, until its size decides how it ships.
+- **TalkingBookTopics is built from every issue found**, 1997 to mid-2017 from the web archive and 2023 on from loc.gov: each book with its title, author, narrator, number, length, year, category and advisories, a full-text index on them, and authors and narrators tables linked to their books. NLS's own descriptions are kept; descriptions NLS took from publishers, Goodreads or Amazon are not, and annotation_source says whose they were. Saved searches show the forms a full-text search takes: Blindness, Civil-War-Nonfiction, Guide-Dogs, Mysteries-in-Scotland, No-Strong-Language and Space-Flight, with Books-By-Year and Narrators. It stays on the development computer until its size decides how it ships.
 
 ## 27 November 2026, late morning -- Talking Book Topics, a first look
 
@@ -52,42 +61,25 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 - **A Say key says its word, then its answer.** Shift+C says "Cell", then the value, as two utterances, through the kit's KeyMap.answer; a quick second press skips the word and spells the value exactly as stored -- a date to the second. Every Say key's "none" answers go the same way.
 - **Say Status is retired, and Shift+Z and Alt+Z are free.** Your screen reader reads the status bar with its own key, and each fact it gave has a key of its own: Shift+M marked, Alt+Delete position, Shift+F filter, Shift+O order; the table is in the window's title. Tutorials 1, 2, 5 and 8 use those keys now.
-- **Looks and primes a person can read.** Every template's tables were reviewed. BrailleForum and BrailleMonitor no longer use article_key or issue_key: an issue's prime is its month and title, and an article's its month, its issue's title (a new issue column) and its place in the issue, which keeps the printed order. DescribedFilms offers are known by film (a new column, the title and year), service, terms and voice instead of a web address; the next build fetches DescribedFilms again for it. The rest were kept, with the reasons in fieldDescriptions.inix.
+- **Looks and primes a person can read.** Every template's tables were reviewed. DescribedFilms offers are known by film (a new column, the title and year), service, terms and voice instead of a web address; the next build fetches DescribedFilms again for it. The rest were kept, with the reasons in fieldDescriptions.inix.
 - **First and last row of a column are Control+Home and Control+End,** as before; Alt+PageUp and Alt+PageDown stay free.
 
-## 26 November 2026, night -- Writer, Control+Shift+H, words first, and the newest Monitor
+## 26 November 2026, night -- Control+Shift+H, words first, and copies that follow
 
-- **The column is writer, not author.** BrailleForum and BrailleMonitor named the byline column author, though DbDo's word is writer, as in the writers table. It is now writer everywhere: the column, the full-text index (`writer:jernigan`), the row's spoken fields, the saved searches and the report. The next build rebuilds both databases from their saved pages.
 - **Open Cell Value is Control+Shift+H.** Control+Enter presses OK in every Lbc dialog, so it no longer opens a cell's value in the grid; H for HTML, as Control+H once was in EdSharp, and a Markdown value opens as a web page.
 - **Every Shift+letter says its word first.** Say Cell says "cell:" before the value, Say Header "header:", Say id "id:", Say Edited "edited:" and Say Marked "marked: yes" or "no", so each answer confirms which command ran; the rest already did. A second press still spells only the value.
-- **The copy DbDo opens follows a reference template.** BrailleMonitor had 11,514 articles in its template, but DbDo kept opening the 5,037 of the copy it had made earlier, since opening a copy writes to it, and a written copy was never replaced. A template whose .inix says FollowTemplate = yes, as both magazines' now do, replaces its copy whenever the template is newer, and DbDo checks the templates at start, before it reopens the last database. A copy's fingerprint is now taken only when its template is newer, so starting stays quick.
-- **The issues of 1987 to 1997 are divided into articles.** Their 75 pages have no headings, so each was one row. Each begins with its own contents list, and each title there starts an article further down in the same capitals, so the builder now divides them at those titles.
-- **Shorter status lines.** "5 of 734 issues, June 2026: 62 rows." and "Issue 6 of 734, May 2026, checking with the site."
-
-## 26 November 2026, evening -- The BrailleMonitor rebuild never goes quiet
-
-- **A status line at least every 20 seconds.** Progress came every fifth issue, but the newest issues are checked with nfb.org one page a second, so the rebuild's first five issues took a silent minute and looked hung. While issues are read, a line now says which issue the work is on whenever 20 seconds pass without one. The rebuild's opening line also gives an honest estimate, roughly half an hour to an hour, since most pages are read from disk, instead of the first run's "some hours."
-- **And the build now shows them.** The build ran each template's repair with its output sent only to the build log, so the rebuild's progress lines never reached the console, which sat silent after "defs: 0 databases renamed from the old name." The repair now speaks on the console, after a "Checking BrailleMonitor.db" line; the build log keeps the command and exit code, and the script's own log keeps the detail.
+- **The copy DbDo opens follows a reference template.** A large reference template had more than twice the rows of the copy DbDo had made earlier, but DbDo kept opening the copy, since opening a copy writes to it, and a written copy was never replaced. A template whose .inix says FollowTemplate = yes, as the large reference templates now do, replaces its copy whenever the template is newer, and DbDo checks the templates at start, before it reopens the last database. A copy's fingerprint is now taken only when its template is newer, so starting stays quick.
 
 ## 26 November 2026, late night -- The freezes found and fixed
 
 - **Moving a row no longer freezes DbDo.** The stall watch's first report named the cause, and it was not the database or its full-text index: two seconds after any change of view -- a row move, a filter, a sort -- DbDo saved the Recent Files list to DbDo.inix one key at a time, about 2,000 keys, each a rewrite of the whole file. With each rewrite slowed by the computer's file scanning, DbDo stopped answering for 2 to 17 seconds. The list is now saved in one write, and not at all when nothing in it changed; a save that still takes half a second or more is logged.
-- **BrailleMonitor's rebuild gets past 1968.** The first rebuild with the older issues read 617 of 734 issues, then stopped at May 1968: one of that page's parts left a list or table open, which hid the next part's dividing mark from Pandoc. When the parts of an issue do not come back one for one, each is now converted alone. The next build carries on from the pages already saved.
 
-## 26 November 2026, night -- The Braille Monitor from 1957, and freezes logged
+## 26 November 2026, night -- Freezes logged
 
-- **BrailleMonitor now reaches back to 1957.** The first full build read 313 issues, from 1985 to 1986 and 2000 on, because it knew only the Monitor's issue folders. The older issues are single pages in many spellings, and the 1987 to 1999 issues have no folder. The builder now reads them too: a one-page issue is divided at its own headings, a table of contents without a folder is read like a folder's, and when a month has both, the folder wins. Issues of The Blind American, which the NFB published in 1961 and 1962 while the Monitor paused, are marked with that edition. The next build sees the older issues are missing and rebuilds the template from the pages already saved, asking nfb.org only about the few it lacks.
-- **A freeze is logged with where it stood.** Moving one row in BrailleMonitor sometimes froze DbDo for 14 to 18 seconds. DbDo now starts the kit's stall watch, so any pause of a second and a half or more writes a WARN line to DbDo's log, with DbDo's own call stack at that moment and the pause's whole length when it ends. The next cycle's log will say what to fix.
+- **A freeze is logged with where it stood.** Moving one row in a large database sometimes froze DbDo for 14 to 18 seconds. DbDo now starts the kit's stall watch, so any pause of a second and a half or more writes a WARN line to DbDo's log, with DbDo's own call stack at that moment and the pause's whole length when it ends. The next cycle's log will say what to fix.
 
-## 26 November 2026, late afternoon -- BrailleMonitor, the NFB Braille Monitor searchable
+## 26 November 2026, evening -- A build beside a running DbDo
 
-- **A new template, BrailleMonitor,** holds the articles of the National Federation of the Blind's magazine, the Braille Monitor: every issue nfb.org offers, from 1957 on, one row an article, with the same tables, writers, keys and full-text index as BrailleForum. scripts\makeBrailleMonitor builds it with makeBrailleForum's own code, replacing only how nfb.org's issues are found and read: each article from its own page, as Markdown in body, with its plain words in search_text for the index. Its first build reads about ten thousand pages, one a second, so it takes some hours; the build runs it when the database is missing, then mends it in place, and installs it in %LOCALAPPDATA%\DbDo\templates beside BrailleForum.
-- **It comes with its searches:** Braille-Literacy, Employment and Structured-Discovery, with Writers, Articles-By-Year, Topic-By-Year and the reading_list report, and a part of the guide on searching it, whose every example each build tries.
-- **Writers with an inner capital,** such as Jacobus tenBroek, the NFB's founder, are now found in bylines, in BrailleForum too.
-
-## 26 November 2026, evening -- BrailleForum's index checked, and a build beside a running DbDo
-
-- **BrailleForum's full-text index did hold every word.** The build's own measure showed the plain words kept for the index, search_text, at a seventh of the Markdown they come from, which looked like lost words. Pandoc's own plain text of the same pages came to the same size, so the words were all there; the rest of body is markup. search_text now comes from Pandoc's plain text all the same, and each build logs which articles have the most markup and what it is, to decide whether body needs any change.
 - **A build while DbDo is open no longer fails on the NVDA library.** A running DbDo holds nvdaControllerClient.dll, so copying the kit's copy over it failed, and one check's build failed with it. When the two are the same file, nothing is copied and the build goes on.
 
 ## 26 November 2026, afternoon -- The Homer pattern, broadened
@@ -99,35 +91,18 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 ## 26 November 2026, early afternoon -- Writers, the Keywords syntax for full text, and statistics
 
 - **Full-text match takes the Keywords syntax.** `&` both, `|` either, `!` not and a star at the end of a word mean what they mean in Keywords, written for the index by the kit's Search.toFullText, but matched by whole words, so art finds art and not start. The index's own syntax, NEAR, a field name and AND, OR and NOT in capitals, still works for more. A star inside a word, or a search of only `!` terms, is searched as Keywords match instead, and DbDo says so.
-- **BrailleForum's authors table is now writers,** since authors and articles shared a first letter, so typing a in the list of tables reached neither at once. The Authors saved search is now Writers.
-- **The search guide is part of DbDo's guide,** in a new Searching BrailleForum part, rather than a Searches.md beside the template, which was outside the Homer doc set. The build removes Searches.md, the old Coverage.md and Authors.sql from the template, its installed copy and DbDo's seeded copy.
-- **Each build writes notes\BrailleForum_Statistics.md,** computed from the finished database: the archive's span and size, the writers of the most articles and the most words, the longest careers, the writers present in the most years, the longest articles, the busiest years and each decade's average length, the biggest issues, the columns that recur, and the words the most articles use. The coverage notes moved beside it, as notes\BrailleForum_Coverage.md.
-
-## 26 November 2026, noon -- BrailleForum's authors, and its search language taught by example
-
-- **An authors table,** one row a person, found in every byline: a role after a comma is set aside (Kim Charlson, ACB President), several writers become several rows (Cynthia Hawkins, Kim Charlson and Dan Spoone), and a middle initial does not split one person in two. Each article is mapped to each of its writers by a maps row of kind written_by, as MusicTrail maps performers to albums, so Alt+Right goes both ways. The byline stays in articles.author as ACB printed it.
-- **Searches.md teaches the search language** in eight short rules, with nine searches that show what Keywords cannot do: nearness, choices and exclusions in one search, word starts, one field, and ranking. A new saved search, Topic-By-Year, counts a subject's articles by year. Authors now reads the authors table.
-- **Every example in Searches.md is run at each build** and its count logged. The first draft had four that FTS5 refused -- NEAR takes no OR, and a group in parentheses needs AND beside it -- which the build would now catch, and Coverage.md names any example that is refused or finds nothing.
-- **The build rebuilds BrailleForum from the saved pages** when it lacks the authors table, fetching nothing and keeping every article's key.
 
 ## 26 November 2026, late morning -- A Markdown field opens as a web page
 
-- **Open Cell Value (Control+Enter) shows a Markdown field as a web page.** An article's body in BrailleForum, or any field declared TEXTMARKDOWN, is converted by the kit's conversions into DbDo's work folder and opened in your browser, titled by the record, with its headings, lists and links working, so a screen reader gives a structured view of the article.
-- **makeBrailleForum says what each part weighs** at every build: the file, body, search_text, text and the full-text index, so the cost of keeping plain words beside the Markdown is measured, not guessed.
+- **Open Cell Value (Control+Enter) shows a Markdown field as a web page.** Any field declared TEXTMARKDOWN is converted by the kit's conversions into DbDo's work folder and opened in your browser, titled by the record, with its headings, lists and links working, so a screen reader gives a structured view of the article.
 
-## 26 November 2026, morning -- BrailleForum's index reads plain words
-
-- **The full-text index reads an article's words without Markdown.** Tested: Markdown's stars, pound signs and dashes cost no match, since the index skips punctuation. But a link's address was indexed as words, so a search for org or acb found every article linking to acb.org; an address could split or fake a phrase; and the passage a search reads aloud carried the markup, such as star star by Janet Dickelman. A new field, search_text, holds a web page's words taken straight from the page with no markup and no addresses, and the index reads it in place of body, which stays Markdown to read. Word counts and fingerprints come from it too, so an article fingerprints alike from either source.
-- **The build rebuilds an older BrailleForum from the saved pages,** fetching nothing and keeping every article's key.
-
-## 25 November 2026, nearly midnight -- BrailleForum in Template Databases
+## 25 November 2026, nearly midnight -- Templates installed apart from DbDo
 
 - **Template Databases (Control+Shift+O) lists templates installed apart from DbDo.** Besides the templates shipped beside the program, DbDo now reads those in %LOCALAPPDATA%\DbDo\templates, one folder each, and treats them alike: listed, copied once into your data folder, and offered by Update Copies from Templates. This is where a template too large for the installer goes, by a build now and a download later.
-- **The build installs BrailleForum there** on the development computer, copying only what is newer. It was missing from the list because the installer leaves it out, and the installed DbDo read only its own templates folder.
 
 ## 25 November 2026, late night -- Full-text search confirmed in DbDo's driver
 
-- **DbDo's SQLite driver has full-text search.** The first build to test it found SQLite 3.39.4 in the driver with FTS5 built in, and on a copy of BrailleForum every search passed through it: 3,187 articles for braille, 297 for Full-text match on "audio description", every saved search, an edit that updates the index, and the index's own check. Searches.md now says so.
+- **DbDo's SQLite driver has full-text search.** The first build to test it found SQLite 3.39.4 in the driver with FTS5 built in, and on a copy of a test database every search passed through it: words, phrases, Full-text match, every saved search, an edit that updates the index, and the index's own check.
 - **The probe logs only SQLite's own files beside the driver.** The driver lives in the Windows system folder, so the first run listed 3,493 Windows files; the check now takes about two seconds.
 
 ## 25 November 2026, night -- Carry on in another Homer program
@@ -136,17 +111,11 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 - **Open Cell Value asks the same** for a file or folder a cell names: a folder Open in FileDir, Markdown or text Edit in EdSharp, the Windows default app beside them. A url opens in the browser as before.
 - **Generate Graphics' Folder shows the files in FileDir,** the page selected, when FileDir is installed, and in Explorer otherwise.
 - **Run Report and Edit Script open in EdSharp when it is installed,** instead of Notepad. [Scripts] editor= in DbDo.inix still names any other editor.
-- **BrailleForum's builder mends the template in place on every build,** asking acb.org for nothing: the first version made the retired views table, and the kit's checkDb failed the first push on it and on the full-text index's own tables, which it now leaves alone.
 
-## 25 November 2026, evening -- BrailleForum, the ACB Braille Forum searchable
+## 25 November 2026, evening -- Full-text search
 
-- **A new template, BrailleForum,** holds the articles of the American Council of the Blind's magazine, The ACB Braille Forum, with its sister the ACB E-Forum: every issue acb.org offers, one row an issue in issues and one row an article in articles, each with its title, author, month, kind and words. DbDo opens it on articles.
-- **Its words come in two fields, by where they came from.** body is Markdown, converted by Pandoc from the article's own web page at acb.org, with ACB's headings, lists, links and bold. text is the article's words exactly as the issue's .txt file has them, used only when no web page holds it. No structure is ever guessed from plain text. format says which.
-- **It is searched by full text.** An FTS5 index, articles_fts, finds words, phrases and words near each other at once, and ranks the best first. Three saved searches come with it, with Authors and Articles-By-Year, and Searches.md beside it shows every form a search takes, ready to paste. kind keeps the masthead, the table of contents and the notices every issue repeats out of a search.
-- **scripts\makeBrailleForum builds it,** and the build runs it when the database is missing: about an hour the first time, then minutes, since it keeps what it fetched and asks again only about recent issues. --limit 12 builds a pilot of the newest 12 issues beside the cache instead. Every article keeps its key across rebuilds, so a person's copy can be updated from the template, and Coverage.md says what is in it and what is not.
-- **The database stays on the development computer.** It is not pushed to GitHub, and the installer leaves the template out, until there is a way to download large databases.
-- **Filter Records offers Full-text match** for a table with a full-text index, such as BrailleForum's articles. It asks for words and keeps the records the index finds -- phrases, OR, NOT, NEAR and word starts -- as the table's own records, so they can be marked, read wide, opened and followed with Alt+Right, which a saved search's list cannot do. It combines with Narrow, Expand and Invert like any condition. A mistyped search, or an SQLite without full-text search, is explained and leaves the filter as it was. Keywords is unchanged: it finds text inside words too, and the index finds whole words, so the two would disagree.
-- **Every build tests full-text search through DbDo's own driver.** scripts\probeOdbcFts asks the SQLite ODBC driver, opened as DbDo opens a database, whether FTS5 works; tries any full-text extension beside the driver when it does not; and runs BrailleForum's searches, Full-text match, an edit and the index's check on a copy. SQLean adds functions, not full-text search, so only the driver can say. The probe never stops the build; its log says what it found.
+- **Filter Records offers Full-text match** for a table with a full-text index, such as the books of TalkingBookTopics. It asks for words and keeps the records the index finds -- phrases, OR, NOT, NEAR and word starts -- as the table's own records, so they can be marked, read wide, opened and followed with Alt+Right, which a saved search's list cannot do. It combines with Narrow, Expand and Invert like any condition. A mistyped search, or an SQLite without full-text search, is explained and leaves the filter as it was. Keywords is unchanged: it finds text inside words too, and the index finds whole words, so the two would disagree.
+- **Every build tests full-text search through DbDo's own driver.** scripts\probeOdbcFts asks the SQLite ODBC driver, opened as DbDo opens a database, whether FTS5 works; tries any full-text extension beside the driver when it does not; and runs saved searches, Full-text match, an edit and the index's check on a copy. SQLean adds functions, not full-text search, so only the driver can say. The probe never stops the build; its log says what it found.
 - **A full-text index is not listed as a table.** DbDo leaves an FTS5 index and its four shadow tables out of its list of tables, as it does sqlite_ tables, and scripts\checkTemplates no longer checks them as tables.
 
 ## 25 November 2026, late afternoon -- Go to, again with F3

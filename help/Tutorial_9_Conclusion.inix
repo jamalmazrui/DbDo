@@ -37,6 +37,14 @@ Hear=RadioTrail, to listen
 Hear=JobTrail, to search for work
 Hear=BookTrail, to read
 Hear=MusicTrail, to explore
+Hear=TalkingBookTopics, to search
+
+[step]
+
+Say=When a template improves, Update from Template offers two buttons; Merge, the first, adds what is new and keeps all of yours. And when someone shares a DbDo database, Get Database brings it in from its path or web address.
+Key=
+Hear=Update from Template: Alt plus H, then U
+Hear=Get Database: Alt plus F, then G
 
 [step]
 
@@ -49,6 +57,12 @@ Hear=
 Say=filter.
 Key=
 Hear=A condition that hides the records not matching it, until it is cleared.
+
+[step]
+
+Say=full-text search.
+Key=
+Hear=A search of whole words through an index, across every record at once: a phrase, either word, a word left out, the best matches first.
 
 [step]
 
