@@ -178,6 +178,10 @@ templates/BrailleMonitor/BrailleMonitor.db.building
 data/TalkingBookTopics/
 templates/TalkingBookTopics/TalkingBookTopics.db
 templates/TalkingBookTopics/TalkingBookTopics.db.building
+data/AppHelpGuides/
+templates/AppHelpGuides/
+scripts/makeAppHelpGuides.cmd
+scripts/makeAppHelpGuides.py
 scripts/release.cmd
 scripts/release.ps1
 data/RadioTrail.inix

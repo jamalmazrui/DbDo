@@ -46,6 +46,13 @@ data/TalkingBookTopics/
 templates/TalkingBookTopics/TalkingBookTopics.db
 templates/TalkingBookTopics/TalkingBookTopics.db.building
 
+# Personal (27 November 2026): every app help guide in one database, built from the AppHelpGuides folder; not shipped,
+# not pushed, named in no public document.
+data/AppHelpGuides/
+templates/AppHelpGuides/
+scripts/makeAppHelpGuides.cmd
+scripts/makeAppHelpGuides.py
+
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.
 scripts/release.cmd

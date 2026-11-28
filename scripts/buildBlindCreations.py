@@ -33,8 +33,6 @@ sDb = os.path.join(sProjectRoot, "templates", "BlindCreations", "BlindCreations.
 oLog = None
 
 
-lsWithdrawnAuthors = ["Dean Martineau"]
-
 
 def logLine(s):
     oLog.write(datetime.datetime.now().strftime("%H:%M:%S") + " " + s + "\n"); oLog.flush()
@@ -239,12 +237,9 @@ def main():
     for e in entries(sBooks):
         sTitle, sRef, sSummary, d = fields(e)
         lBy = names(d.get("author", d.get("authors", "")))
-        # WITHDRAWN BY THEIR AUTHOR (27 November 2026). An author wrote that his books in BlindCreations "can't be gotten
-        # any more", so a reader would be sent to something not to be had. Books by the authors in lsWithdrawnAuthors
-        # are left out here; the MyPages BlindBooks directory should drop them too, so the two agree.
-        if any(key(sBy) in [key(x) for x in lsWithdrawnAuthors] for sBy in lBy):
-            logLine("left out, withdrawn by its author: %s by %s" % (sTitle, ", ".join(lBy)))
-            continue
+        # THE CRITERIA DECIDE, NOT THE AUTHOR (27 November 2026). A withdrawal list left out an author's books when he
+        # thought them not worth including; Jamal ruled that every book meeting the directory's criteria -- a working link
+        # and the date rule -- is included, the same way for everyone, so the list was removed.
         sUrl = dBookRefs.get(sRef.lower(), sRef if sRef.startswith("http") else "")
         c.execute("INSERT INTO books (title, by, year, category, format, available_from, summary, url, tags) VALUES (?,?,?,?,?,?,?,?,?)",
                   (sTitle, ", ".join(lBy), plain(d.get("year", "")), plain(d.get("category", "")), plain(d.get("format", "")),

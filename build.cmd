@@ -419,6 +419,19 @@ if exist "!sHere!scripts\makeTalkingBookTopics.py" (
   echo TalkingBookTopics: exit code !iTbt!>> "!log!"
   if not "!iTbt!"=="0" echo The TalkingBookTopics template was not built; its log in logs names why. The build goes on.
 )
+rem APP HELP GUIDES (27 November 2026, Jamal: "create AppHelpGuides.db as part of the build_release process, and like
+rem the Braille Forum/Monitor dbs, make it personal to me"). makeAppHelpGuides reads every guide in the AppHelpGuides
+rem folder into templates\AppHelpGuides\AppHelpGuides.db with a full-text index. LocalFiles.txt keeps the script and the
+rem template folder off GitHub, the installer leaves the folder out, and the install step below puts it in
+rem %LOCALAPPDATA%\DbDo\templates. --due returns at once when the database is newer than the script and every guide; with
+rem no AppHelpGuides folder, or no script, nothing happens. A failure is reported and logged but does not stop the build.
+if exist "!sHere!scripts\makeAppHelpGuides.py" (
+  echo AppHelpGuides: python scripts\makeAppHelpGuides.py --due>> "!log!"
+  python "!sHere!scripts\makeAppHelpGuides.py" --due
+  set "iAhg=!errorlevel!"
+  echo AppHelpGuides: exit code !iAhg!>> "!log!"
+  if not "!iAhg!"=="0" echo AppHelpGuides.db was not built; its log in logs names why. The build goes on.
+)
 rem RETIRED BRAILLEFORUM FILES (26 November 2026). Searches.md and Coverage.md sat beside the template, outside the
 rem Homer doc set: the search guide is now the BrailleForum part of help\DbDo.md, and the coverage notes are
 rem notes\BrailleForum_Coverage.md, beside the new notes\BrailleForum_Statistics.md. Authors.sql became Writers.sql with
@@ -437,7 +450,7 @@ rem the shipped ones beside the program and %LOCALAPPDATA%\DbDo\templates, the p
 rem from the program. This puts the master copy there, only what is newer, leaving out the copy being built and any
 rem stray logs; the next time DbDo lists its templates, it seeds its own copy into the data folder as it does any other.
 rem robocopy's exit codes below 8 mean success.
-for %%M in (BrailleForum BrailleMonitor TalkingBookTopics) do (
+for %%M in (BrailleForum BrailleMonitor TalkingBookTopics AppHelpGuides) do (
   if exist "!sHere!templates\%%M\%%M.db" (
     set "sUserTemplates=%LOCALAPPDATA%\DbDo\templates\%%M"
     robocopy "!sHere!templates\%%M" "!sUserTemplates!" /E /XO /XD logs /XF *.building *.db-journal *.db-wal *.db-shm /R:2 /W:2 /NP /NJH /NJS /NDL >> "!log!" 2>&1

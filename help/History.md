@@ -12,7 +12,8 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 - **A Fields box can name another field.** Typing city=seattle, or city:seattle, in a Filter Records box now tests the city field, whichever box it is typed in.
 - **RadioTrail spells each American state one way.** Stations listed WA, Washington, Tacoma WA or Seattle Washington are all Washington now, and a town written there moves to city, so a state or city filter finds them all.
 - **Added and edited are said in your own time.** They are stored in Coordinated Universal Time, but were said as if local, so in Seattle a record added at 1:47 PM was said to be added at 9:47 PM.
-- **BlindCreations leaves out books their author has withdrawn.**
+- **BlindCreations includes every book that meets its criteria.** A book with a working link where it can be had, first published in 2000 or later, is listed, whatever its author thinks of it now.
+- **BlindCreations, BlindSkills and TechTraining are rebuilt from the latest directories.** BlindCreations now holds 198 apps, 110 books, 149 creators and 84 presentations, among them Joshua Stirland's Ramblio and TweeseCake.
 - **In Brief keeps articles that give an office's email,** such as museum tours and a tactile atlas, and leaves out only lists of members.
 - **The ReadMe and FAQ answer what testers asked:** why only two or three columns show at first, how to find a city's radio stations, and how to bring a spreadsheet into a database you already have.
 
