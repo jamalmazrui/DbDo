@@ -186,6 +186,14 @@ data/PodcastDirectories/
 templates/PodcastDirectories/
 scripts/makePodcastDirectories.cmd
 scripts/makePodcastDirectories.py
+scripts/kbCore.py
+scripts/makeConsumerPubs.cmd
+scripts/makeConsumerPubs.py
+scripts/makeDirectoryDbs.cmd
+scripts/makeDirectoryDbs.py
+templates/AudioVault/
+templates/ConsumerPubs/
+templates/DescribedTours/
 scripts/release.cmd
 scripts/release.ps1
 data/RadioTrail.inix
