@@ -655,8 +655,19 @@ rem exec\fingerprints.json here). "build fresh" builds regardless.
 set "bNothingChanged="
 set "sFingerprint=!homerDev!\scripts\fingerprint.py"
 set "lsProgramInputs=DbDo.cs DbDoMacros.cs DbDo.js DbDo.ico DbDo.manifest 2db.cs build.cmd version.txt !homerSources!"
-set "lsSetupInputs=DbDo_setup.iss "!homerDev!\Templates\HomerComponents.iss" version.txt exec help scripts templates"
-for %%d in (configs data) do if exist "%%d" set "lsSetupInputs=!lsSetupInputs! %%d"
+rem WHAT THE INSTALLER LEAVES OUT IS NOT ITS INPUT (27 November 2026, the first build of the personal databases): the
+rem whole templates and data folders were inputs, so rebuilding AppHelpGuides.db (555 MB) or PodcastDirectories.db, which
+rem the installer excludes, made a new installer for nothing, and push and release, which read every input again under
+rem HomerVerify, read those databases too. Each folder of templates and data is an input unless it is one the installer
+rem excludes, listed once here; the files at their tops still are.
+set "sUnshipped= BrailleForum BrailleMonitor AppHelpGuides PodcastDirectories "
+set "lsSetupInputs=DbDo_setup.iss "!homerDev!\Templates\HomerComponents.iss" version.txt exec help scripts"
+if exist "configs" set "lsSetupInputs=!lsSetupInputs! configs"
+for %%R in (templates data) do if exist "%%R" (
+  for %%F in ("%%R\*") do set "lsSetupInputs=!lsSetupInputs! "%%R\%%~nxF""
+  for /d %%D in ("%%R\*") do if "!sUnshipped: %%~nxD =!"=="!sUnshipped!" set "lsSetupInputs=!lsSetupInputs! "%%R\%%~nxD""
+)
+echo Installer inputs: !lsSetupInputs!>> "!log!"
 for %%f in (License.md License.htm ReadMe.md ReadMe.htm DbDo.ico) do if exist "%%f" set "lsSetupInputs=!lsSetupInputs! %%f"
 if /i "%~1"=="fresh" goto :changesChecked
 if not exist "!sFingerprint!" goto :changesChecked
