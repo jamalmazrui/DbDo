@@ -53,6 +53,13 @@ templates/AppHelpGuides/
 scripts/makeAppHelpGuides.cmd
 scripts/makeAppHelpGuides.py
 
+# Personal (27 November 2026): every episode of every podcast directory in one database, built from the
+# PodcastDirectories folder; not shipped, not pushed, named in no public document.
+data/PodcastDirectories/
+templates/PodcastDirectories/
+scripts/makePodcastDirectories.cmd
+scripts/makePodcastDirectories.py
+
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.
 scripts/release.cmd

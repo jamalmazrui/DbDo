@@ -432,6 +432,17 @@ if exist "!sHere!scripts\makeAppHelpGuides.py" (
   echo AppHelpGuides: exit code !iAhg!>> "!log!"
   if not "!iAhg!"=="0" echo AppHelpGuides.db was not built; its log in logs names why. The build goes on.
 )
+rem PODCAST DIRECTORIES (27 November 2026, Jamal: "how about a personal PodcastDirectories.db. Naturally, Control+P would
+rem play each particular podcast"). makePodcastDirectories reads every show's directory page in the PodcastDirectories
+rem folder into templates\PodcastDirectories\PodcastDirectories.db, one episode a record with its audio in stream_url,
+rem and a full-text index. Personal, as AppHelpGuides is, and run the same way: --due, never stopping the build.
+if exist "!sHere!scripts\makePodcastDirectories.py" (
+  echo PodcastDirectories: python scripts\makePodcastDirectories.py --due>> "!log!"
+  python "!sHere!scripts\makePodcastDirectories.py" --due
+  set "iPod=!errorlevel!"
+  echo PodcastDirectories: exit code !iPod!>> "!log!"
+  if not "!iPod!"=="0" echo PodcastDirectories.db was not built; its log in logs names why. The build goes on.
+)
 rem RETIRED BRAILLEFORUM FILES (26 November 2026). Searches.md and Coverage.md sat beside the template, outside the
 rem Homer doc set: the search guide is now the BrailleForum part of help\DbDo.md, and the coverage notes are
 rem notes\BrailleForum_Coverage.md, beside the new notes\BrailleForum_Statistics.md. Authors.sql became Writers.sql with
@@ -450,7 +461,7 @@ rem the shipped ones beside the program and %LOCALAPPDATA%\DbDo\templates, the p
 rem from the program. This puts the master copy there, only what is newer, leaving out the copy being built and any
 rem stray logs; the next time DbDo lists its templates, it seeds its own copy into the data folder as it does any other.
 rem robocopy's exit codes below 8 mean success.
-for %%M in (BrailleForum BrailleMonitor TalkingBookTopics AppHelpGuides) do (
+for %%M in (BrailleForum BrailleMonitor TalkingBookTopics AppHelpGuides PodcastDirectories) do (
   if exist "!sHere!templates\%%M\%%M.db" (
     set "sUserTemplates=%LOCALAPPDATA%\DbDo\templates\%%M"
     robocopy "!sHere!templates\%%M" "!sUserTemplates!" /E /XO /XD logs /XF *.building *.db-journal *.db-wal *.db-shm /R:2 /W:2 /NP /NJH /NJS /NDL >> "!log!" 2>&1

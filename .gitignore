@@ -182,6 +182,10 @@ data/AppHelpGuides/
 templates/AppHelpGuides/
 scripts/makeAppHelpGuides.cmd
 scripts/makeAppHelpGuides.py
+data/PodcastDirectories/
+templates/PodcastDirectories/
+scripts/makePodcastDirectories.cmd
+scripts/makePodcastDirectories.py
 scripts/release.cmd
 scripts/release.ps1
 data/RadioTrail.inix

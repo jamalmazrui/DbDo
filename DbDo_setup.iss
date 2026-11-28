@@ -437,7 +437,7 @@ Source: "data\defs.db"; DestDir: "{app}\data"; Flags: ignoreversion
 ; release asset to keep in step, on a release weekend. The database is 144 MB but mostly text, which lzma2 packs
 ; tightly; the build log gives the installer's size. BrailleForum and BrailleMonitor stay out: they are Jamal's own,
 ; named in no public document. A half-built TalkingBookTopics.db.building is never shipped (*.building).
-Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log,*.db-wal,*.db-shm,*.db-journal,*.building,\BrailleForum,\BrailleMonitor,\AppHelpGuides"
+Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log,*.db-wal,*.db-shm,*.db-journal,*.building,\BrailleForum,\BrailleMonitor,\AppHelpGuides,\PodcastDirectories"
 ; ALWAYS REPLACED (7 November 2026). This copy is the program's own: its [Hotkeys] descriptions feed the
 ; Key Describer, and onlyifdoesntexist kept the FIRST install's copy forever, so removed keys went on being
 ; described. A person's settings live in %LOCALAPPDATA%\DbDo\DbDo.inix, which this line never touches.
