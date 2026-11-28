@@ -445,9 +445,14 @@ if exist "!sHere!scripts\makePodcastDirectories.py" (
 )
 rem MORE PERSONAL KNOWLEDGE BASES (27 November 2026, Jamal: "continue the pattern of making personal knowledgebases
 rem available to me via DbDo"). Each builder here shares scripts\kbCore and runs the same way, --due, never stopping the
-rem build: makeConsumerPubs builds ConsumerPubs.db from the ConsumerPubs folder, and makeDirectoryDbs builds
-rem AudioVault.db and DescribedTours.db from those MyPages directories. A builder that is not here is passed over.
-for %%S in (makeConsumerPubs makeDirectoryDbs) do if exist "!sHere!scripts\%%S.py" (
+rem build: makeDocCollections builds ConsumerPubs.db, AmericanCivics.db and WritingGuides.db from those collections'
+rem folders, and makeDirectoryDbs builds AudioVault.db and DescribedTours.db from those MyPages directories. A builder
+rem that is not here is passed over. makeConsumerPubs, which makeDocCollections replaced (28 November 2026), is retired.
+for %%F in (makeConsumerPubs.py makeConsumerPubs.cmd) do if exist "!sHere!scripts\%%F" (
+  del /q "!sHere!scripts\%%F"
+  echo Retired scripts\%%F: makeDocCollections builds ConsumerPubs.db now.>> "!log!"
+)
+for %%S in (makeDocCollections makeDirectoryDbs) do if exist "!sHere!scripts\%%S.py" (
   echo %%S: python scripts\%%S.py --due>> "!log!"
   python "!sHere!scripts\%%S.py" --due
   set "iKb=!errorlevel!"
@@ -472,7 +477,7 @@ rem the shipped ones beside the program and %LOCALAPPDATA%\DbDo\templates, the p
 rem from the program. This puts the master copy there, only what is newer, leaving out the copy being built and any
 rem stray logs; the next time DbDo lists its templates, it seeds its own copy into the data folder as it does any other.
 rem robocopy's exit codes below 8 mean success.
-for %%M in (BrailleForum BrailleMonitor TalkingBookTopics AppHelpGuides PodcastDirectories ConsumerPubs AudioVault DescribedTours) do (
+for %%M in (BrailleForum BrailleMonitor TalkingBookTopics AppHelpGuides PodcastDirectories ConsumerPubs AudioVault DescribedTours AmericanCivics WritingGuides) do (
   if exist "!sHere!templates\%%M\%%M.db" (
     set "sUserTemplates=%LOCALAPPDATA%\DbDo\templates\%%M"
     robocopy "!sHere!templates\%%M" "!sUserTemplates!" /E /XO /XD logs /XF *.building *.db-journal *.db-wal *.db-shm /R:2 /W:2 /NP /NJH /NJS /NDL >> "!log!" 2>&1
@@ -671,7 +676,7 @@ rem whole templates and data folders were inputs, so rebuilding AppHelpGuides.db
 rem the installer excludes, made a new installer for nothing, and push and release, which read every input again under
 rem HomerVerify, read those databases too. Each folder of templates and data is an input unless it is one the installer
 rem excludes, listed once here; the files at their tops still are.
-set "sUnshipped= BrailleForum BrailleMonitor AppHelpGuides PodcastDirectories ConsumerPubs AudioVault DescribedTours "
+set "sUnshipped= BrailleForum BrailleMonitor AppHelpGuides PodcastDirectories ConsumerPubs AudioVault DescribedTours AmericanCivics WritingGuides "
 set "lsSetupInputs=DbDo_setup.iss "!homerDev!\Templates\HomerComponents.iss" version.txt exec help scripts"
 if exist "configs" set "lsSetupInputs=!lsSetupInputs! configs"
 for %%R in (templates data) do if exist "%%R" (

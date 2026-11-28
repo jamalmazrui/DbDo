@@ -62,13 +62,15 @@ scripts/makePodcastDirectories.py
 
 # Personal (27 November 2026): more knowledge bases from Jamal's own collections, built with the shared kbCore.
 scripts/kbCore.py
-scripts/makeConsumerPubs.cmd
-scripts/makeConsumerPubs.py
+scripts/makeDocCollections.cmd
+scripts/makeDocCollections.py
 scripts/makeDirectoryDbs.cmd
 scripts/makeDirectoryDbs.py
+templates/AmericanCivics/
 templates/AudioVault/
 templates/ConsumerPubs/
 templates/DescribedTours/
+templates/WritingGuides/
 
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.
